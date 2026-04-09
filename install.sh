@@ -119,29 +119,11 @@ download_source_dir() {
   else
     REPO_URL_CLEAN="${REPO_URL%/}"
     REPO_NAME="${REPO_URL_CLEAN##*/}"
+    DOWNLOAD_URL="$REPO_URL_CLEAN/-/archive/$REF/$REPO_NAME-$REF.zip"
 
-    URL_CANDIDATES="
-$REPO_URL_CLEAN/-/archive/$REF/$REPO_NAME-$REF.zip
-$REPO_URL_CLEAN/archive/refs/heads/$REF.zip
-$REPO_URL_CLEAN/archive/$REF.zip
-"
-
-    DOWNLOAD_OK=0
-    OLD_IFS="${IFS}"
-    IFS='
-'
-    for candidate in $URL_CANDIDATES; do
-      if [ -n "$candidate" ] && curl -L --fail "$candidate" -o "$ZIP_PATH"; then
-        if is_valid_zip "$ZIP_PATH"; then
-          DOWNLOAD_OK=1
-          break
-        fi
-      fi
-    done
-    IFS="${OLD_IFS}"
-
-    if [ "$DOWNLOAD_OK" -ne 1 ]; then
-      fail "Could not download a repo archive from $REPO_URL. Pass --archive-url if your code host uses a custom archive path."
+    curl -L --fail "$DOWNLOAD_URL" -o "$ZIP_PATH"
+    if ! is_valid_zip "$ZIP_PATH"; then
+      fail "Repo archive URL did not return a valid zip file: $DOWNLOAD_URL"
     fi
   fi
 
