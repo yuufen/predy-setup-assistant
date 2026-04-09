@@ -1,0 +1,6 @@
+interface:
+  display_name: "Predy Setup Assistant"
+  short_description: "Install Predy and fix MCP on a fresh Mac"
+  default_prompt: "Use $predy-setup-assistant to help me install Predy, fix certificates, and configure Codex MCP step by step."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,57 @@
+---
+description: Predy setup assistant for installing Predy and fixing local MCP bootstrap issues
+globs:
+  - "**/.codex/config.toml"
+  - "**/.cursor/rules/**"
+  - "**/.github/skills/**"
+  - "**/.codewiz/skills/**"
+alwaysApply: false
+---
+
+Use this rule only for Predy installation and repair requests.
+
+Trigger when the user asks things like:
+- install Predy
+- configure Predy MCP
+- Predy cannot start because Node is missing
+- Predy localhost certificate is broken
+- the user is not an engineer and wants step-by-step help
+
+Workflow:
+1. Check the machine first.
+2. Fix the smallest missing prerequisite first.
+3. Prefer plain-language explanations for non-engineers.
+4. Prefer beta when the request is specifically about Predy setup unless the user asks for stable.
+5. If a private registry is required, get it from project docs or the user. Do not hardcode it into the public rule.
+
+Check order:
+1. `node`, `npm`, `npx`
+2. `brew` on macOS if Node or mkcert is missing
+3. `mkcert`
+4. `~/.predy-skill/certs/localhost.pem`
+5. `~/.predy-skill/certs/localhost-key.pem`
+6. `~/.codex/config.toml`
+
+Preferred install command:
+
+```bash
+npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --codex
+```
+
+Preferred Predy MCP bootstrap:
+
+1. Create a wrapper script that runs `predy-skill install --codex` on first run when the Predy skill or localhost certificates are missing.
+2. Then launch `predy-skill mcp` from the same wrapper.
+3. Point `~/.codex/config.toml` at that wrapper with:
+
+```toml
+[mcp_servers.predy]
+command = "/absolute/path/to/.codex/bin/predy-mcp-beta.sh"
+args = []
+```
+
+Constraints:
+- This rule does not bypass approvals or sandbox restrictions.
+- Stop and explain the blocker if the machine cannot access the required package source or cannot write `~/.codex`.
+- Do not treat generic Node or certificate questions as Predy questions unless the user explicitly ties them to Predy.
