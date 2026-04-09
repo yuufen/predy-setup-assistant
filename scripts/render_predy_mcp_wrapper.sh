@@ -1,7 +1,8 @@
 #!/bin/sh
 set -eu
 
-REGISTRY="${PREDY_NPM_REGISTRY:-}"
+DEFAULT_REGISTRY="http://npm.devops.xiaohongshu.com:7001"
+REGISTRY="${PREDY_NPM_REGISTRY-$DEFAULT_REGISTRY}"
 PACKAGE="${PREDY_SKILL_PACKAGE:-@predy-js/skill@beta}"
 CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
 OUTPUT=""

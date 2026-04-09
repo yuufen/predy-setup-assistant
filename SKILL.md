@@ -67,7 +67,8 @@ Use this for the first pass. It reports:
 Use this to create an idempotent wrapper script that:
 
 - uses `PREDY_SKILL_PACKAGE` or defaults to `@predy-js/skill@beta`
-- accepts an optional registry through `PREDY_NPM_REGISTRY` or `--registry`
+- defaults to the internal registry `http://npm.devops.xiaohongshu.com:7001`
+- still allows overriding the registry through `PREDY_NPM_REGISTRY` or `--registry`
 - self-heals first-run setup by calling `predy-skill install --codex` before `predy-skill mcp`
 
 ### `scripts/upsert_codex_predy_mcp.py`
@@ -81,7 +82,7 @@ If `python3` is missing, edit the TOML directly instead of blocking on this scri
 1. Assume the user may be unfamiliar with Node, shell commands, and certificate trust.
 2. Prefer doing the work for the user when local edits are possible.
 3. Explain the purpose of each privileged or networked command in plain language before running it.
-4. If a private registry is required, get it from project documentation or the user and pass it through `PREDY_NPM_REGISTRY`, `NPM_CONFIG_REGISTRY`, or `--registry`.
+4. Default to the internal registry `http://npm.devops.xiaohongshu.com:7001`. Only override it if project documentation or the user explicitly asks for another package source.
 5. Prefer the beta channel unless the user explicitly asks for stable.
 6. Remember that this skill does not bypass Codex permissions. Homebrew install, system trust changes, and protected writes still require normal approval.
 7. Stop at hard blockers such as missing Homebrew on macOS, missing package source access, or lack of permission to write `~/.codex`.

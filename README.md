@@ -107,3 +107,77 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 ## 一句话总结
 
 先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、证书、MCP 和 Predy 本体都会按步骤带你完成。
+
+## 给工程 / 支持同学的补充说明
+
+如果你不是终端新手，或者你是在帮别人排查安装问题，下面这些信息可以直接用。
+
+### 内部包源
+
+- 包源地址：`http://npm.devops.xiaohongshu.com:7001`
+- 包名：`@predy-js/skill@beta`
+
+### 实际安装 Predy 的命令
+
+如果机器已经具备基础条件，需要直接走 Predy 的真实安装流程，可以执行：
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --codex
+```
+
+### 生成 Codex MCP wrapper
+
+仓库里的 wrapper 生成脚本已经默认使用内部包源，所以一般不需要再手动传 `--registry`：
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --output "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
+
+如果你想覆盖默认包源，也可以显式传：
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --registry "http://npm.devops.xiaohongshu.com:7001" \
+  --package "@predy-js/skill@beta" \
+  --output "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
+
+### 写入 Codex MCP 配置
+
+```bash
+python3 ./scripts/upsert_codex_predy_mcp.py \
+  --config "$HOME/.codex/config.toml" \
+  --command "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
+
+期望写入的配置块如下：
+
+```toml
+[mcp_servers.predy]
+command = "/absolute/path/to/.codex/bin/predy-mcp-beta.sh"
+args = []
+```
+
+### 验证
+
+先执行：
+
+```bash
+./scripts/predy_setup_doctor.sh
+```
+
+重点检查下面几个字段：
+
+- `predy.skill.state=present`
+- `predy.cert.state=present`
+- `predy.key.state=present`
+- `codex.predy_mcp_config=present`
+
+可选的运行时检查：
+
+```bash
+lsof -nP -iTCP:17654 -sTCP:LISTEN
+```

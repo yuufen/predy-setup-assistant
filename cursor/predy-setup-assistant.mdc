@@ -22,7 +22,7 @@ Workflow:
 2. Fix the smallest missing prerequisite first.
 3. Prefer plain-language explanations for non-engineers.
 4. Prefer beta when the request is specifically about Predy setup unless the user asks for stable.
-5. If a private registry is required, get it from project docs or the user. Do not hardcode it into the public rule.
+5. Default to the internal registry `http://npm.devops.xiaohongshu.com:7001`. Only override it if project docs or the user explicitly asks for another package source.
 
 Check order:
 1. `node`, `npm`, `npx`
@@ -35,7 +35,8 @@ Check order:
 Preferred install command:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
 

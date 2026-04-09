@@ -21,9 +21,7 @@ This guide is especially for users who are new to the command line or just want 
 
 This skill improves guidance and execution order. It does not bypass Codex sandbox or approval rules.
 
-This skill is public and should not hardcode a private registry.
-
-If Predy is published to a private registry in your environment, get that registry from project documentation or the user before running install commands.
+This repo is internal. Use the default internal registry unless project documentation or the user explicitly asks for another package source.
 
 ## First Pass
 
@@ -44,18 +42,19 @@ Fix the earliest missing prerequisite first.
 
 ## Package Source And Version Rules
 
-1. Do not hardcode a private registry in the public skill.
+1. Default registry: `http://npm.devops.xiaohongshu.com:7001`
 2. Prefer `@predy-js/skill@beta` unless the user explicitly asks for stable.
 3. Do not ask the user to install a global `predy-skill` binary unless they specifically want a global command.
-4. If a private registry is required, get it from project documentation or the user, then pass it through `PREDY_NPM_REGISTRY`, `NPM_CONFIG_REGISTRY`, or `--registry`.
+4. If another registry is required, override the default through `PREDY_NPM_REGISTRY`, `NPM_CONFIG_REGISTRY`, or `--registry`.
 5. Prefer:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
 
-If a private registry is required, adapt it to:
+If another registry is required, adapt it to:
 
 ```bash
 env NPM_CONFIG_REGISTRY=<your-registry> \
@@ -72,7 +71,7 @@ This repo is designed to cover multiple assistants:
 3. Cursor uses `cursor/predy-setup-assistant.mdc`.
 4. Copilot and CodeWiz can consume the root skill folder as a copied skill payload.
 
-For public distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
+For user distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
 
 Use `scripts/install_targets.sh` only when you already have a local copy of the repo and want a direct local install.
 
@@ -83,7 +82,7 @@ https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant
 git@code.devops.xiaohongshu.com:fe/infra/predy-setup-assistant.git
 ```
 
-Public bootstrap examples after the repo is available:
+Bootstrap examples after the repo is available:
 
 ```bash
 curl -L -o /tmp/predy-setup-install.sh https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant/-/raw/main/install.sh
@@ -148,7 +147,8 @@ Do not call `mkcert -install` manually first if the next step is `predy-skill in
 For Codex-only onboarding, use:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
 
@@ -176,7 +176,9 @@ Generate the wrapper with:
 scripts/render_predy_mcp_wrapper.sh --output "$HOME/.codex/bin/predy-mcp-beta.sh"
 ```
 
-If a private registry is required in your environment, also pass:
+That script already defaults to the internal registry.
+
+If you need another registry in a special environment, also pass:
 
 ```bash
 scripts/render_predy_mcp_wrapper.sh \

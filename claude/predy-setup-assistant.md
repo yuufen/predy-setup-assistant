@@ -14,7 +14,7 @@ Default operating rules:
 3. Fix the smallest missing prerequisite first.
 4. Prefer `@predy-js/skill@beta` for Predy setup unless the user explicitly asks for stable.
 5. Do not bypass approvals for Homebrew install, system trust changes, or writes outside the normal workspace.
-6. If a private registry is required, get it from project docs or the user. Do not hardcode it into the public skill.
+6. Default to the internal registry `http://npm.devops.xiaohongshu.com:7001`. Only override it if project docs or the user explicitly asks for another package source.
 
 Check order:
 
@@ -28,7 +28,8 @@ Check order:
 Preferred Predy install command:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
 
@@ -38,14 +39,16 @@ Preferred MCP bootstrap pattern:
 2. In that wrapper, if the Predy Codex skill or localhost certificates are missing, run:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
 
 3. Then launch:
 
 ```bash
-npm exec --yes --package=@predy-js/skill@beta -- \
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill mcp
 ```
 
