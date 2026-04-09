@@ -70,6 +70,10 @@ need_cmd() {
   fi
 }
 
+is_valid_zip() {
+  unzip -tqq "$1" >/dev/null 2>&1
+}
+
 resolve_self_source_dir() {
   case "$0" in
     -* | sh | bash | zsh)
@@ -109,6 +113,9 @@ download_source_dir() {
 
   if [ -n "$ARCHIVE_URL" ]; then
     curl -L --fail "$ARCHIVE_URL" -o "$ZIP_PATH"
+    if ! is_valid_zip "$ZIP_PATH"; then
+      fail "Archive URL did not return a valid zip file: $ARCHIVE_URL"
+    fi
   else
     REPO_URL_CLEAN="${REPO_URL%/}"
     REPO_NAME="${REPO_URL_CLEAN##*/}"
@@ -124,9 +131,11 @@ $REPO_URL_CLEAN/archive/$REF.zip
     IFS='
 '
     for candidate in $URL_CANDIDATES; do
-    if [ -n "$candidate" ] && curl -L --fail "$candidate" -o "$ZIP_PATH"; then
-        DOWNLOAD_OK=1
-        break
+      if [ -n "$candidate" ] && curl -L --fail "$candidate" -o "$ZIP_PATH"; then
+        if is_valid_zip "$ZIP_PATH"; then
+          DOWNLOAD_OK=1
+          break
+        fi
       fi
     done
     IFS="${OLD_IFS}"
