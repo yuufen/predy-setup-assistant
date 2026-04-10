@@ -1,5 +1,5 @@
 ---
-description: Predy setup assistant for installing Predy and diagnosing local setup issues. Do not assume Codex MCP config applies to Cursor.
+description: Predy setup assistant for installing Predy and diagnosing local setup issues. Cursor MCP config is not auto-written here; render a prompt for Cursor to configure it.
 globs:
   - "**/.cursor/rules/**"
   - "**/.github/skills/**"
@@ -28,7 +28,7 @@ Check order:
 2. `brew` on macOS if Node is missing or the Predy install flow later needs it
 3. `~/.predy-skill/certs/localhost.pem`
 4. `~/.predy-skill/certs/localhost-key.pem`
-5. Only if the user explicitly also wants Codex configured on this machine: `~/.codex/config.toml`
+5. Optional manual MCP prompt output if the user wants Predy MCP in Cursor
 
 Preferred install command:
 
@@ -43,17 +43,25 @@ Do not ask the user to install `mkcert` or local certificates manually before th
 Preferred Predy MCP bootstrap:
 
 1. Do not tell the user that writing `~/.codex/config.toml` configures Cursor. It does not.
-2. The bundled wrapper script and `config.toml` upsert helper in this repo are Codex-only helpers.
-3. Only if the user explicitly also wants Codex configured on the same machine, point `~/.codex/config.toml` at that wrapper with:
+2. Create a wrapper script for Cursor:
 
-```toml
-[mcp_servers.predy]
-command = "/absolute/path/to/.codex/bin/predy-mcp-beta.sh"
-args = []
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client cursor \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+3. Then render a manual MCP prompt for Cursor:
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client cursor \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
 Constraints:
 - This rule does not bypass approvals or sandbox restrictions.
 - Stop and explain the blocker if the machine cannot access the required package source.
-- If the current task is Cursor-only MCP wiring, stop and say this repo does not implement Cursor's MCP config writer.
+- If the current task is Cursor MCP wiring, return the rendered prompt instead of pretending Cursor is already configured.
 - Do not treat generic Node or certificate questions as Predy questions unless the user explicitly ties them to Predy.

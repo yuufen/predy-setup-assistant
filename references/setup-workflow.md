@@ -8,7 +8,7 @@
 4. Target Compatibility
 5. macOS Repair Order
 6. Predy Install Flow
-7. Codex MCP Bootstrap
+7. Client MCP Bootstrap
 8. Verification
 9. Stop Conditions
 10. Phrasing For Non-Engineers
@@ -34,7 +34,7 @@ Use its output to classify the machine into one of these states:
 1. Missing package manager prerequisites
 2. Missing Node/npm
 3. Missing Predy install or localhost certs
-4. Missing Codex MCP config only, when the target client is Codex
+4. Missing MCP config only, for a client that this repo can configure directly
 5. Fully installed but broken at runtime
 
 Fix the earliest missing prerequisite first.
@@ -72,9 +72,9 @@ This repo is designed to cover multiple assistants:
 
 Important boundary:
 
-- The bundled MCP bootstrap scripts in this repo are Codex-only.
-- Do not write `~/.codex/config.toml` and claim that Cursor, CodeWiz, Claude, or Copilot are now configured for MCP.
-- For non-Codex clients, this repo currently installs setup guidance and target-specific skill assets; their MCP client wiring must follow that client's own config location and rules.
+- This repo can auto-configure MCP for Codex and CodeWiz.
+- Do not write `~/.codex/config.toml` and claim that Cursor, Claude, or Copilot are now configured for MCP.
+- For Claude, Cursor, and Copilot, this repo should render a manual MCP-setup prompt after it generates the right wrapper command.
 
 For user distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
 
@@ -204,39 +204,64 @@ After install, verify the target-specific skill asset plus the shared certificat
 - `~/.predy-skill/certs/localhost.pem`
 - `~/.predy-skill/certs/localhost-key.pem`
 
-## Codex MCP Bootstrap
+## Client MCP Bootstrap
 
-This section is Codex-only.
+Generate a wrapper first. The wrapper keeps following the current beta package and can self-heal first-run setup.
 
-Do not run this section for Cursor, CodeWiz, Claude, or Copilot unless the user explicitly also wants Codex configured on the same machine.
+Explain it in user language as: "给客户端放一个启动脚本，以后它每次都能自己把 Predy 拉起来。"
 
-Prefer a wrapper script over a raw `npx` entry so that each launch follows the current beta tag and can self-heal first-run setup.
-
-Explain it in user language as: "给 Codex 放一个启动脚本，以后它每次都能自己把 Predy 拉起来。"
-
-Generate the wrapper with:
-
-```bash
-scripts/render_predy_mcp_wrapper.sh --output "$HOME/.codex/bin/predy-mcp-beta.sh"
-```
-
-That script already defaults to the internal registry.
-
-If you need another registry in a special environment, also pass:
+`Codex`
 
 ```bash
 scripts/render_predy_mcp_wrapper.sh \
-  --registry "<your-registry>" \
+  --client codex \
   --output "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
+
+`CodeWiz`
+
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client codewiz \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
+```
+
+`Claude`
+
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client claude \
+  --output "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
+```
+
+`Cursor`
+
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client cursor \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+`Copilot`
+
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client copilot \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
 ```
 
 That script writes a shell wrapper which:
 
-1. checks for the Predy Codex skill and localhost certificates
-2. runs `predy-skill install --codex` if first-run setup is still missing
+1. checks for the selected client's Predy asset and localhost certificates
+2. runs the matching `predy-skill install --<client>` command if first-run setup is still missing
 3. starts `predy-skill mcp`
 
-Then upsert the Codex config with:
+### Codex auto-config
+
+After the wrapper exists, upsert the Codex config with:
 
 ```bash
 python3 scripts/upsert_codex_predy_mcp.py \
@@ -252,13 +277,53 @@ command = "/absolute/path/to/.codex/bin/predy-mcp-beta.sh"
 args = []
 ```
 
+### CodeWiz auto-config
+
+After the wrapper exists, upsert the CodeWiz config with:
+
+```bash
+python3 scripts/upsert_codewiz_predy_mcp.py \
+  --config "$HOME/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json" \
+  --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
+```
+
+### Claude / Cursor / Copilot manual prompt
+
+For these clients, render a prompt after the wrapper is ready.
+
+`Claude`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client claude \
+  --command "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
+```
+
+`Cursor`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client cursor \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+`Copilot`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client copilot \
+  --command "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
+```
+
+Give the rendered prompt to the current client and let its agent finish the MCP configuration there.
+
 ## Verification
 
-After Codex MCP setup, confirm:
+After MCP setup, confirm:
 
-1. `scripts/predy_setup_doctor.sh` shows `present` for the Predy skill, certificates, and MCP block
+1. `scripts/predy_setup_doctor.sh` shows `present` for localhost certificates and the relevant auto-config MCP block; for Codex it also shows the installed skill path
 2. the wrapper script exists and is executable
-3. `~/.codex/config.toml` points at the expected absolute path
+3. the client-specific config points at the expected absolute path when that client supports auto-config here
 
 If the user wants a live runtime check, start the wrapper script and verify:
 
@@ -277,7 +342,7 @@ Stop and explain the blocker if any of these are true:
 
 1. the machine cannot reach the required package source or registry
 2. Homebrew installation is required but the user does not approve it
-3. the agent cannot write the target skill location, or `~/.codex` / `~/.predy-skill` for Codex bootstrap
+3. the agent cannot write the target skill location, or the relevant MCP config path for Codex / CodeWiz bootstrap
 4. a managed device or local policy blocks certificate trust changes
 
 ## Phrasing For Non-Engineers
@@ -286,5 +351,5 @@ Prefer short explanations like:
 
 - "先补 Node，这样 npm 命令才能跑。"
 - "然后运行 Predy 安装，它会把本地证书和当前客户端需要的 Predy 资产一起准备好。"
-- "如果你现在用的是 Codex，最后再写一条 Codex MCP 配置，让它以后自己能拉起 Predy 服务。"
-- "如果你现在不是 Codex，就不要去改 `~/.codex/config.toml`，那不会帮当前客户端生效。"
+- "如果你现在用的是 Codex 或 CodeWiz，最后再把它的 MCP 配置写好。"
+- "如果你现在用的是 Claude、Cursor 或 Copilot，我给你一条 prompt，让当前客户端自己把 MCP 配好。"

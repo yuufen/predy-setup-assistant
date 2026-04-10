@@ -10,7 +10,8 @@
 先说明一件事：
 
 - 这个仓库可以把 `predy-setup-assistant` 安装到 `Codex`、`Claude`、`Cursor`、`CodeWiz` 等客户端里。
-- 但仓库里自带的 MCP 启动脚本和 `config.toml` 写入脚本目前只覆盖 `Codex`。
+- 仓库里自带的 MCP 自动配置目前覆盖 `Codex` 和 `CodeWiz`。
+- `Claude`、`Cursor`、`Copilot` 暂时不自动写 MCP 配置；setup assistant 会生成一条 prompt，让对应客户端里的 agent 去配置。
 - 不要把 `~/.codex/config.toml` 当成 `Claude`、`Cursor`、`CodeWiz` 的通用 MCP 配置地址。
 
 ## 开始前
@@ -55,7 +56,7 @@ bash /tmp/predy-setup-install.sh --claude
 ```
 
 4. 后面如果 Claude 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-5. 如果你后面还要把 Predy MCP 接进 Claude，请按 Claude 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 Claude 的配置文件。
+5. 如果你后面还要把 Predy MCP 接进 Claude，setup assistant 会给你一条可直接复制的 prompt，让 Claude 自己去配置。
 
 ## 如果你用的是 Cursor
 
@@ -76,7 +77,7 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 ```
 
 5. 后面如果 Cursor 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 Cursor，请按 Cursor 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 Cursor 的配置文件。
+6. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会给你一条可直接复制的 prompt，让 Cursor 自己去配置。
 
 ## 如果你用的是 CodeWiz
 
@@ -97,7 +98,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 ```
 
 5. 后面如果 CodeWiz 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 CodeWiz，请按 CodeWiz 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 CodeWiz 的配置文件。
+6. 如果你后面还要把 Predy MCP 接进 CodeWiz，setup assistant 可以继续自动写入 CodeWiz 的 MCP 配置。
 
 ## 安装过程中常见情况
 
@@ -116,7 +117,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 
 ## 一句话总结
 
-先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex` 场景还可以继续用这套仓库去配置 MCP。
+先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex` 和 `CodeWiz` 还可以继续自动配置 MCP；其他客户端会收到一条配置 prompt。
 
 ## 给工程 / 支持同学的补充说明
 
@@ -173,27 +174,60 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
 
 这些命令都会走同一套 `install` 主流程，也都会准备本地证书。
 
-### 生成 Codex MCP wrapper
+### 生成 Predy MCP wrapper
 
-这一步只在 `Codex` 场景需要。
+不同客户端都可以复用同一个 wrapper 生成脚本，区别只在 `--client` 和是否需要 `--project`。
 
-仓库里的 wrapper 生成脚本已经默认使用内部包源，所以一般不需要再手动传 `--registry`：
-
-```bash
-./scripts/render_predy_mcp_wrapper.sh \
-  --output "$HOME/.codex/bin/predy-mcp-beta.sh"
-```
-
-如果你想覆盖默认包源，也可以显式传：
+`Codex`
 
 ```bash
 ./scripts/render_predy_mcp_wrapper.sh \
-  --registry "http://npm.devops.xiaohongshu.com:7001" \
-  --package "@predy-js/skill@beta" \
+  --client codex \
   --output "$HOME/.codex/bin/predy-mcp-beta.sh"
 ```
 
-### 写入 Codex MCP 配置
+`CodeWiz`
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --client codewiz \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
+```
+
+`Claude`
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --client claude \
+  --output "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
+```
+
+`Cursor`
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --client cursor \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+`Copilot`
+
+```bash
+./scripts/render_predy_mcp_wrapper.sh \
+  --client copilot \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
+```
+
+如果你想覆盖默认包源，也可以在上面任一命令里追加：
+
+```bash
+--registry "http://npm.devops.xiaohongshu.com:7001" --package "@predy-js/skill@beta"
+```
+
+### 自动写入 Codex MCP 配置
 
 这一步只在 `Codex` 场景需要。
 
@@ -211,6 +245,60 @@ command = "/absolute/path/to/.codex/bin/predy-mcp-beta.sh"
 args = []
 ```
 
+### 自动写入 CodeWiz MCP 配置
+
+这一步只在 `CodeWiz` 场景需要。
+
+```bash
+python3 ./scripts/upsert_codewiz_predy_mcp.py \
+  --config "$HOME/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json" \
+  --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
+```
+
+期望写入的配置块大致如下：
+
+```json
+{
+  "mcpServers": {
+    "predy-mcp": {
+      "type": "stdio",
+      "command": "/absolute/path/to/.predy-skill/bin/predy-mcp-codewiz-beta.sh",
+      "args": []
+    }
+  }
+}
+```
+
+### 给 Claude / Cursor / Copilot 生成配置 prompt
+
+这一步适合当前还不支持自动写 MCP 配置的客户端。
+
+`Claude`
+
+```bash
+python3 ./scripts/render_manual_mcp_prompt.py \
+  --client claude \
+  --command "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
+```
+
+`Cursor`
+
+```bash
+python3 ./scripts/render_manual_mcp_prompt.py \
+  --client cursor \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+`Copilot`
+
+```bash
+python3 ./scripts/render_manual_mcp_prompt.py \
+  --client copilot \
+  --command "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
+```
+
+运行后会输出一条中文 prompt。把那条 prompt 直接发给对应客户端里的 agent，让它自己去完成 MCP 配置。
+
 ### 验证
 
 先执行：
@@ -224,7 +312,8 @@ args = []
 - `predy.skill.state=present`
 - `predy.cert.state=present`
 - `predy.key.state=present`
-- `codex.predy_mcp_config=present`
+- `codex.predy_mcp_config=present`（如果当前目标是 Codex）
+- `codewiz.predy_mcp_config=present`（如果当前目标是 CodeWiz）
 
 可选的运行时检查：
 

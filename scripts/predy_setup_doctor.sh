@@ -43,6 +43,7 @@ HOME_DIR="${HOME:-}"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME_DIR/.codex}"
 CODEX_CONFIG_PATH="$CODEX_HOME_DIR/config.toml"
 CODEX_BIN_DIR="$CODEX_HOME_DIR/bin"
+CODEWIZ_MCP_CONFIG_PATH="${CODEWIZ_MCP_CONFIG_PATH:-$HOME_DIR/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json}"
 PREDY_SKILL_DIR="$CODEX_HOME_DIR/skills/predy-code-assistant"
 PREDY_CERT_DIR="$HOME_DIR/.predy-skill/certs"
 PREDY_CERT_PATH="$PREDY_CERT_DIR/localhost.pem"
@@ -56,6 +57,8 @@ print_kv "codex.config" "$CODEX_CONFIG_PATH"
 print_kv "codex.config.state" "$(file_state "$CODEX_CONFIG_PATH")"
 print_kv "codex.bin.dir" "$CODEX_BIN_DIR"
 print_kv "codex.bin.state" "$(dir_state "$CODEX_BIN_DIR")"
+print_kv "codewiz.mcp.config" "$CODEWIZ_MCP_CONFIG_PATH"
+print_kv "codewiz.mcp.config.state" "$(file_state "$CODEWIZ_MCP_CONFIG_PATH")"
 print_kv "predy.skill.dir" "$PREDY_SKILL_DIR"
 print_kv "predy.skill.state" "$(dir_state "$PREDY_SKILL_DIR")"
 print_kv "predy.cert.path" "$PREDY_CERT_PATH"
@@ -80,4 +83,10 @@ if [ -f "$CODEX_CONFIG_PATH" ] && grep -Eq '^\[mcp_servers\.predy\]' "$CODEX_CON
   print_kv "codex.predy_mcp_config" "present"
 else
   print_kv "codex.predy_mcp_config" "missing"
+fi
+
+if [ -f "$CODEWIZ_MCP_CONFIG_PATH" ] && grep -Eq '"(predy-mcp|predy-skill)"[[:space:]]*:' "$CODEWIZ_MCP_CONFIG_PATH"; then
+  print_kv "codewiz.predy_mcp_config" "present"
+else
+  print_kv "codewiz.predy_mcp_config" "missing"
 fi
