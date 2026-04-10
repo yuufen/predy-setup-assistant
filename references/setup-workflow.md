@@ -93,14 +93,11 @@ git@github.com:yuufen/predy-setup-assistant.git
 Bootstrap examples after the repo is available:
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --codex
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codex
 
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --claude
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --claude
 
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --cursor --project /path/to/repo
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --cursor --project /path/to/repo
 ```
 
 Local repo examples:

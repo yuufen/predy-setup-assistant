@@ -24,8 +24,7 @@
 1. 把下面这两行命令复制到终端里执行：
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --codex
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codex
 ```
 
 2. 安装完成后，彻底退出 Codex，再重新打开。
@@ -43,8 +42,7 @@ $predy-setup-assistant 帮我一步步安装 Predy
 1. 把下面这两行命令复制到终端里执行：
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --claude
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --claude
 ```
 
 2. 安装完成后，彻底退出 Claude，再重新打开。
@@ -64,8 +62,7 @@ bash /tmp/predy-setup-install.sh --claude
 2. 进入项目目录后，执行下面这两行命令：
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 ```
 
 3. 回到 Cursor，重新打开这个项目。
@@ -86,8 +83,7 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 2. 进入项目目录后，执行下面这两行命令：
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
-bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 ```
 
 3. 回到 CodeWiz，重新打开这个项目。
