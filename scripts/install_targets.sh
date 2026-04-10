@@ -97,7 +97,9 @@ if [ "$INSTALL_CLAUDE" -eq 1 ]; then
 fi
 
 if [ "$INSTALL_CURSOR" -eq 1 ]; then
+  copy_dir "$ROOT_DIR" "$PROJECT_DIR/.cursor/$SKILL_NAME"
   copy_file "$ROOT_DIR/cursor/$SKILL_NAME.mdc" "$PROJECT_DIR/.cursor/rules/$SKILL_NAME.mdc"
+  printf 'cursor helper bundle installed: %s\n' "$PROJECT_DIR/.cursor/$SKILL_NAME"
   printf 'cursor rule installed: %s\n' "$PROJECT_DIR/.cursor/rules/$SKILL_NAME.mdc"
 fi
 

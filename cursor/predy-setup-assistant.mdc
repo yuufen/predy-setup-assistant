@@ -43,27 +43,28 @@ Do not ask the user to install `mkcert` or local certificates manually before th
 Preferred Predy MCP bootstrap:
 
 1. Do not tell the user that writing `~/.codex/config.toml` configures Cursor. It does not.
-2. Create a wrapper script for Cursor:
+2. Use the installed helper bundle under `./.cursor/predy-setup-assistant/scripts`.
+3. Create a wrapper script for Cursor:
 
 ```bash
-scripts/render_predy_mcp_wrapper.sh \
+./.cursor/predy-setup-assistant/scripts/render_predy_mcp_wrapper.sh \
   --client cursor \
   --project /path/to/repo \
   --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-3. Auto-write Cursor MCP config:
+4. Auto-write Cursor MCP config:
 
 ```bash
-python3 scripts/upsert_cursor_predy_mcp.py \
+python3 ./.cursor/predy-setup-assistant/scripts/upsert_cursor_predy_mcp.py \
   --config "$HOME/.cursor/mcp.json" \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-4. If auto-write is blocked or the user wants a fallback, render a manual MCP prompt for Cursor:
+5. If auto-write is blocked or the user wants a fallback, render a manual MCP prompt for Cursor:
 
 ```bash
-python3 scripts/render_manual_mcp_prompt.py \
+python3 ./.cursor/predy-setup-assistant/scripts/render_manual_mcp_prompt.py \
   --client cursor \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
