@@ -9,7 +9,7 @@ Use this skill for Predy installation, first-run setup, and local repair tasks.
 
 ## Quick Start
 
-1. Run `scripts/predy_setup_doctor.sh` first.
+1. Run `scripts/predy_setup_doctor.sh --client <client> [--project /path/to/repo]` first.
 2. Read `references/setup-workflow.md` before choosing the next command.
 3. Fix the smallest missing prerequisite first.
 4. Use the bundled scripts to generate the MCP wrapper for every client, auto-write MCP config for Codex and CodeWiz, and render a manual prompt for Claude, Cursor, or Copilot when needed.
@@ -59,13 +59,14 @@ Use this for the first pass. It reports:
 - OS and architecture
 - `node`, `npm`, `npx`, `python3`, `brew`, `mkcert`
 - the selected target client and optional project path
-- `CODEX_HOME`, `~/.codex/config.toml`, and Predy skill install state when the target is Codex
-- CodeWiz global MCP config state under `~/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json`
+- the target-specific Predy skill path and state
+- the current target client's MCP config path and state when this repo can auto-configure it
 - localhost certificate file state
-- whether a Codex or CodeWiz Predy MCP entry already exists
+- whether the current target client's Predy MCP entry already exists
 
 Treat `mkcert` as a diagnostic signal, not as a standalone installation step that must happen before `predy-skill install`.
-For `cursor`, `codewiz`, or `copilot`, pass `--client` and `--project` so `predy.skill.state` reflects the actual target project.
+Do not default to a Codex MCP check when the user is configuring another client.
+For `cursor`, `codewiz`, or `copilot`, pass `--client` and `--project` so `predy.skill.state` and `predy.mcp.config.state` reflect the actual target project.
 
 ### `scripts/render_predy_mcp_wrapper.sh`
 

@@ -322,14 +322,23 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 ./scripts/predy_setup_doctor.sh --client codewiz --project /path/to/repo
 ```
 
+如果你还没确定当前要配哪个客户端，也可以先直接运行：
+
+```bash
+./scripts/predy_setup_doctor.sh
+```
+
+但这只会检查通用环境和证书，不会默认把结果当成 Codex MCP 状态。
+
 重点检查下面几个字段：
 
 - `target.client` 是你当前要排查的客户端
+- `target.config.state` 是当前客户端配置文件的状态；对 Claude / Cursor / Copilot 会显示 `manual_required`
 - `predy.skill.state=present`
+- `predy.mcp.config.mode=auto`（Codex / CodeWiz）或 `manual_prompt`（Claude / Cursor / Copilot）
+- `predy.mcp.config.state=present`（如果当前目标是 Codex 或 CodeWiz）
 - `predy.cert.state=present`
 - `predy.key.state=present`
-- `codex.predy_mcp_config=present`（如果当前目标是 Codex）
-- `codewiz.predy_mcp_config=present`（如果当前目标是 CodeWiz）
 
 可选的运行时检查：
 

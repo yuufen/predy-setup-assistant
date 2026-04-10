@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-CLIENT="${PREDY_SETUP_CLIENT:-codex}"
+CLIENT="${PREDY_SETUP_CLIENT:-}"
 PROJECT_DIR="${PREDY_SETUP_PROJECT_DIR:-}"
 
 print_kv() {
@@ -46,7 +46,8 @@ Usage:
   ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz|copilot] [--project /path/to/repo]
 
 Notes:
-  - Default client is codex.
+  - Pass --client to check the target client's skill and MCP state.
+  - Without --client, the script only reports generic environment and certificate state.
   - --project is required for cursor, codewiz, and copilot if you want target-specific skill state.
 EOF
 }
@@ -105,39 +106,80 @@ CODEWIZ_MCP_CONFIG_PATH="${CODEWIZ_MCP_CONFIG_PATH:-$HOME_DIR/.rcs/storage/defau
 PREDY_CERT_DIR="$HOME_DIR/.predy-skill/certs"
 PREDY_CERT_PATH="$PREDY_CERT_DIR/localhost.pem"
 PREDY_KEY_PATH="$PREDY_CERT_DIR/localhost-key.pem"
+PREDY_SKILL_DIR=""
+PREDY_SKILL_STATE="client_required"
+TARGET_CONFIG_PATH=""
+TARGET_CONFIG_STATE="client_required"
+PREDY_MCP_CONFIG_PATH=""
+PREDY_MCP_CONFIG_MODE="client_required"
+PREDY_MCP_CONFIG_STATE="client_required"
 
 case "$CLIENT" in
+  "")
+    CLIENT="unspecified"
+    ;;
   codex)
     PREDY_SKILL_DIR="$CODEX_HOME_DIR/skills/predy-code-assistant"
     PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    TARGET_CONFIG_PATH="$CODEX_CONFIG_PATH"
+    TARGET_CONFIG_STATE="$(file_state "$TARGET_CONFIG_PATH")"
+    PREDY_MCP_CONFIG_PATH="$CODEX_CONFIG_PATH"
+    PREDY_MCP_CONFIG_MODE="auto"
+    if [ -f "$CODEX_CONFIG_PATH" ] && grep -Eq '^\[mcp_servers\.predy\]' "$CODEX_CONFIG_PATH"; then
+      PREDY_MCP_CONFIG_STATE="present"
+    else
+      PREDY_MCP_CONFIG_STATE="missing"
+    fi
     ;;
   claude)
     PREDY_SKILL_DIR="$CLAUDE_HOME_DIR/skills/predy-code-assistant"
     PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    TARGET_CONFIG_STATE="manual_required"
+    PREDY_MCP_CONFIG_MODE="manual_prompt"
+    PREDY_MCP_CONFIG_STATE="manual_required"
     ;;
   cursor)
     if [ -n "$PROJECT_DIR" ]; then
       PREDY_SKILL_DIR="$PROJECT_DIR/.cursor/rules/predy-code-assistant.mdc"
+      PREDY_MCP_CONFIG_STATE="manual_required"
     else
       PREDY_SKILL_DIR=""
+      PREDY_MCP_CONFIG_STATE="project_required"
     fi
     PREDY_SKILL_STATE="$(state_from_path file "$PREDY_SKILL_DIR")"
+    TARGET_CONFIG_STATE="$PREDY_MCP_CONFIG_STATE"
+    PREDY_MCP_CONFIG_MODE="manual_prompt"
     ;;
   codewiz)
     if [ -n "$PROJECT_DIR" ]; then
       PREDY_SKILL_DIR="$PROJECT_DIR/.codewiz/skills/predy-code-assistant"
+      PREDY_MCP_CONFIG_STATE="missing"
     else
       PREDY_SKILL_DIR=""
+      PREDY_MCP_CONFIG_STATE="project_required"
     fi
     PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    TARGET_CONFIG_PATH="$CODEWIZ_MCP_CONFIG_PATH"
+    TARGET_CONFIG_STATE="$(file_state "$TARGET_CONFIG_PATH")"
+    PREDY_MCP_CONFIG_PATH="$CODEWIZ_MCP_CONFIG_PATH"
+    PREDY_MCP_CONFIG_MODE="auto"
+    if [ "$PREDY_MCP_CONFIG_STATE" != "project_required" ] &&
+      [ -f "$CODEWIZ_MCP_CONFIG_PATH" ] &&
+      grep -Eq '"(predy-mcp|predy-skill)"[[:space:]]*:' "$CODEWIZ_MCP_CONFIG_PATH"; then
+      PREDY_MCP_CONFIG_STATE="present"
+    fi
     ;;
   copilot)
     if [ -n "$PROJECT_DIR" ]; then
       PREDY_SKILL_DIR="$PROJECT_DIR/.github/skills/predy-code-assistant"
+      PREDY_MCP_CONFIG_STATE="manual_required"
     else
       PREDY_SKILL_DIR=""
+      PREDY_MCP_CONFIG_STATE="project_required"
     fi
     PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    TARGET_CONFIG_STATE="$PREDY_MCP_CONFIG_STATE"
+    PREDY_MCP_CONFIG_MODE="manual_prompt"
     ;;
   *)
     printf 'Unknown client: %s\n' "$CLIENT" >&2
@@ -150,15 +192,13 @@ print_kv "os.arch" "$ARCH_NAME"
 print_kv "home.dir" "$HOME_DIR"
 print_kv "target.client" "$CLIENT"
 print_kv "target.project" "${PROJECT_DIR:-}"
-print_kv "codex.home" "$CODEX_HOME_DIR"
-print_kv "codex.config" "$CODEX_CONFIG_PATH"
-print_kv "codex.config.state" "$(file_state "$CODEX_CONFIG_PATH")"
-print_kv "codex.bin.dir" "$CODEX_BIN_DIR"
-print_kv "codex.bin.state" "$(dir_state "$CODEX_BIN_DIR")"
-print_kv "codewiz.mcp.config" "$CODEWIZ_MCP_CONFIG_PATH"
-print_kv "codewiz.mcp.config.state" "$(file_state "$CODEWIZ_MCP_CONFIG_PATH")"
+print_kv "target.config.path" "$TARGET_CONFIG_PATH"
+print_kv "target.config.state" "$TARGET_CONFIG_STATE"
 print_kv "predy.skill.dir" "$PREDY_SKILL_DIR"
 print_kv "predy.skill.state" "$PREDY_SKILL_STATE"
+print_kv "predy.mcp.config.path" "$PREDY_MCP_CONFIG_PATH"
+print_kv "predy.mcp.config.mode" "$PREDY_MCP_CONFIG_MODE"
+print_kv "predy.mcp.config.state" "$PREDY_MCP_CONFIG_STATE"
 print_kv "predy.cert.path" "$PREDY_CERT_PATH"
 print_kv "predy.cert.state" "$(file_state "$PREDY_CERT_PATH")"
 print_kv "predy.key.path" "$PREDY_KEY_PATH"
@@ -176,15 +216,3 @@ print_kv "tool.brew.path" "$(tool_path brew)"
 print_kv "tool.brew.version" "$(tool_version brew --version)"
 print_kv "tool.mkcert.path" "$(tool_path mkcert)"
 print_kv "tool.mkcert.version" "$(tool_version mkcert -version)"
-
-if [ -f "$CODEX_CONFIG_PATH" ] && grep -Eq '^\[mcp_servers\.predy\]' "$CODEX_CONFIG_PATH"; then
-  print_kv "codex.predy_mcp_config" "present"
-else
-  print_kv "codex.predy_mcp_config" "missing"
-fi
-
-if [ -f "$CODEWIZ_MCP_CONFIG_PATH" ] && grep -Eq '"(predy-mcp|predy-skill)"[[:space:]]*:' "$CODEWIZ_MCP_CONFIG_PATH"; then
-  print_kv "codewiz.predy_mcp_config" "present"
-else
-  print_kv "codewiz.predy_mcp_config" "missing"
-fi

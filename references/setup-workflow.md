@@ -27,7 +27,9 @@ This repo is internal. Use the default internal registry unless project document
 
 Run:
 
-- `scripts/predy_setup_doctor.sh`
+- `scripts/predy_setup_doctor.sh --client <client> [--project /path/to/repo]`
+
+If you do not know the target client yet, you may run `scripts/predy_setup_doctor.sh` without `--client` for generic environment and certificate checks only. Do not treat that generic run as a Codex MCP diagnosis.
 
 Use its output to classify the machine into one of these states:
 
@@ -323,7 +325,7 @@ Give the rendered prompt to the current client and let its agent finish the MCP 
 
 After MCP setup, confirm:
 
-1. `scripts/predy_setup_doctor.sh --client <client> [--project /path/to/repo]` shows `present` for localhost certificates, the target-specific skill path, and the relevant auto-config MCP block
+1. `scripts/predy_setup_doctor.sh --client <client> [--project /path/to/repo]` shows `present` for localhost certificates, the target-specific skill path, and `predy.mcp.config.state=present` when the selected client supports auto-config here
 2. the wrapper script exists and is executable
 3. the client-specific config points at the expected absolute path when that client supports auto-config here
 
