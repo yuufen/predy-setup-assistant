@@ -76,7 +76,8 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 ```
 
 5. 后面如果 Cursor 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会先尝试自动写入 `~/.cursor/mcp.json`；如果自动写失败，也会给你一条可直接复制的 prompt 兜底。
+6. 安装完成后，项目里会多出一个 `./.cursor/predy-setup-assistant/` 目录，里面放的是 setup assistant 给 Cursor 用的 helper 脚本。
+7. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会先尝试自动写入 `~/.cursor/mcp.json`；如果自动写失败，也会给你一条可直接复制的 prompt 兜底。
 
 ## 如果你用的是 CodeWiz
 
@@ -391,6 +392,12 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 - `predy.mcp.config.state=present`（如果当前目标是 Codex / Cursor / CodeWiz）
 - `predy.cert.state=present`
 - `predy.key.state=present`
+
+常见的配置文件路径是：
+
+- `Codex`: `~/.codex/config.toml`
+- `Cursor`: `~/.cursor/mcp.json`
+- `CodeWiz`: `~/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json`
 
 可选的运行时检查：
 
