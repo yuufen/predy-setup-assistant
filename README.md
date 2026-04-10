@@ -7,6 +7,12 @@
 你不需要先安装 `predy-skill`，也不需要先 `git clone` 仓库。
 只要复制下面对应的一段命令到终端里执行，然后按提示操作就可以。
 
+先说明一件事：
+
+- 这个仓库可以把 `predy-setup-assistant` 安装到 `Codex`、`Claude`、`Cursor`、`CodeWiz` 等客户端里。
+- 但仓库里自带的 MCP 启动脚本和 `config.toml` 写入脚本目前只覆盖 `Codex`。
+- 不要把 `~/.codex/config.toml` 当成 `Claude`、`Cursor`、`CodeWiz` 的通用 MCP 配置地址。
+
 ## 开始前
 
 1. 先确认你正在用哪一个 AI 客户端：
@@ -48,7 +54,8 @@ bash /tmp/predy-setup-install.sh --claude
 请使用 predy-setup-assistant 帮我一步步安装 Predy
 ```
 
-4. 后面如果 Claude 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
+4. 后面如果 Claude 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
+5. 如果你后面还要把 Predy MCP 接进 Claude，请按 Claude 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 Claude 的配置文件。
 
 ## 如果你用的是 Cursor
 
@@ -68,7 +75,8 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 帮我一步步安装 Predy
 ```
 
-5. 后面如果 Cursor 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
+5. 后面如果 Cursor 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
+6. 如果你后面还要把 Predy MCP 接进 Cursor，请按 Cursor 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 Cursor 的配置文件。
 
 ## 如果你用的是 CodeWiz
 
@@ -88,14 +96,15 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 帮我一步步安装 Predy
 ```
 
-5. 后面如果 CodeWiz 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
+5. 后面如果 CodeWiz 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
+6. 如果你后面还要把 Predy MCP 接进 CodeWiz，请按 CodeWiz 自己的配置方式继续，不要把 `~/.codex/config.toml` 当成 CodeWiz 的配置文件。
 
 ## 安装过程中常见情况
 
 1. 如果终端提示你允许下载、允许访问网络、允许写入配置，正常确认即可。
 2. 如果系统提示你输入 Mac 登录密码，这通常是正常的，因为它可能在安装基础工具或本地证书。
 3. 如果 AI 提示你要安装 Homebrew 或 Node，这是正常步骤，不用自己提前折腾。
-4. 本地证书和 `mkcert` 会在 `predy-skill install --codex` 时自动处理，不需要你先手动安装证书工具。
+4. 本地证书和 `mkcert` 会在 `predy-skill install` 时自动处理，不需要你先手动安装证书工具。
 5. 如果浏览器或系统提示你信任本地证书，按提示操作即可。
 
 ## 什么情况需要找工程同学
@@ -107,7 +116,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 
 ## 一句话总结
 
-先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy、本地证书和 MCP 都会按步骤带你完成。
+先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex` 场景还可以继续用这套仓库去配置 MCP。
 
 ## 给工程 / 支持同学的补充说明
 
@@ -120,7 +129,9 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 
 ### 实际安装 Predy 的命令
 
-如果机器已经具备基础条件，需要直接走 Predy 的真实安装流程，可以执行：
+按客户端分别用：
+
+`Codex`
 
 ```bash
 env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
@@ -128,7 +139,43 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
   predy-skill install --codex
 ```
 
+`Claude`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --claude
+```
+
+`Cursor`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --cursor --project /path/to/repo
+```
+
+`CodeWiz`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --codewiz --project /path/to/repo
+```
+
+`Copilot`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --copilot --project /path/to/repo
+```
+
+这些命令都会走同一套 `install` 主流程，也都会准备本地证书。
+
 ### 生成 Codex MCP wrapper
+
+这一步只在 `Codex` 场景需要。
 
 仓库里的 wrapper 生成脚本已经默认使用内部包源，所以一般不需要再手动传 `--registry`：
 
@@ -147,6 +194,8 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
 ```
 
 ### 写入 Codex MCP 配置
+
+这一步只在 `Codex` 场景需要。
 
 ```bash
 python3 ./scripts/upsert_codex_predy_mcp.py \

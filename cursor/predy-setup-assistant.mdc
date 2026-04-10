@@ -1,7 +1,6 @@
 ---
-description: Predy setup assistant for installing Predy and fixing local MCP bootstrap issues
+description: Predy setup assistant for installing Predy and diagnosing local setup issues. Do not assume Codex MCP config applies to Cursor.
 globs:
-  - "**/.codex/config.toml"
   - "**/.cursor/rules/**"
   - "**/.github/skills/**"
   - "**/.codewiz/skills/**"
@@ -29,23 +28,23 @@ Check order:
 2. `brew` on macOS if Node is missing or the Predy install flow later needs it
 3. `~/.predy-skill/certs/localhost.pem`
 4. `~/.predy-skill/certs/localhost-key.pem`
-5. `~/.codex/config.toml`
+5. Only if the user explicitly also wants Codex configured on this machine: `~/.codex/config.toml`
 
 Preferred install command:
 
 ```bash
 env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
   npm exec --yes --package=@predy-js/skill@beta -- \
-  predy-skill install --codex
+  predy-skill install --cursor --project /path/to/repo
 ```
 
 Do not ask the user to install `mkcert` or local certificates manually before this command. It already prepares the local certificate setup when needed.
 
 Preferred Predy MCP bootstrap:
 
-1. Create a wrapper script that runs `predy-skill install --codex` on first run when the Predy skill or localhost certificates are missing.
-2. Then launch `predy-skill mcp` from the same wrapper.
-3. Point `~/.codex/config.toml` at that wrapper with:
+1. Do not tell the user that writing `~/.codex/config.toml` configures Cursor. It does not.
+2. The bundled wrapper script and `config.toml` upsert helper in this repo are Codex-only helpers.
+3. Only if the user explicitly also wants Codex configured on the same machine, point `~/.codex/config.toml` at that wrapper with:
 
 ```toml
 [mcp_servers.predy]
@@ -55,5 +54,6 @@ args = []
 
 Constraints:
 - This rule does not bypass approvals or sandbox restrictions.
-- Stop and explain the blocker if the machine cannot access the required package source or cannot write `~/.codex`.
+- Stop and explain the blocker if the machine cannot access the required package source.
+- If the current task is Cursor-only MCP wiring, stop and say this repo does not implement Cursor's MCP config writer.
 - Do not treat generic Node or certificate questions as Predy questions unless the user explicitly ties them to Predy.
