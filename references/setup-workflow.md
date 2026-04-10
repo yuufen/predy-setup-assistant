@@ -86,20 +86,20 @@ Use `scripts/install_targets.sh` only when you already have a local copy of the 
 This repo is expected to live at:
 
 ```text
-https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant
-git@code.devops.xiaohongshu.com:fe/infra/predy-setup-assistant.git
+https://github.com/yuufen/predy-setup-assistant
+git@github.com:yuufen/predy-setup-assistant.git
 ```
 
 Bootstrap examples after the repo is available:
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant/-/raw/main/install.sh
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
 bash /tmp/predy-setup-install.sh --codex
 
-curl -L -o /tmp/predy-setup-install.sh https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant/-/raw/main/install.sh
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
 bash /tmp/predy-setup-install.sh --claude
 
-curl -L -o /tmp/predy-setup-install.sh https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant/-/raw/main/install.sh
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh
 bash /tmp/predy-setup-install.sh --cursor --project /path/to/repo
 ```
 

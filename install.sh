@@ -2,8 +2,8 @@
 set -eu
 
 SKILL_NAME="predy-setup-assistant"
-DEFAULT_REPO_HOST="https://code.devops.xiaohongshu.com"
-DEFAULT_REPO="fe/infra/predy-setup-assistant"
+DEFAULT_REPO_HOST="https://github.com"
+DEFAULT_REPO="yuufen/predy-setup-assistant"
 DEFAULT_REPO_URL="$DEFAULT_REPO_HOST/$DEFAULT_REPO"
 REPO="$DEFAULT_REPO"
 REPO_URL="$DEFAULT_REPO_URL"
@@ -32,8 +32,8 @@ Usage:
   ./install.sh --archive-url <repo-archive-url> --cursor --project /path/to/repo
 
 Options:
-  --repo <namespace/name> Repository path, default: fe/infra/predy-setup-assistant
-  --repo-url <url>        Repository web URL, default: https://code.devops.xiaohongshu.com/fe/infra/predy-setup-assistant
+  --repo <namespace/name> Repository path, default: yuufen/predy-setup-assistant
+  --repo-url <url>        Repository web URL, default: https://github.com/yuufen/predy-setup-assistant
   --archive-url <url>     Repository archive URL for this ref, overrides auto-detection
   --ref <git-ref>         Git ref to download, default: main
   --source-dir <path>     Local skill directory, mainly for testing or local use
@@ -118,8 +118,15 @@ download_source_dir() {
     fi
   else
     REPO_URL_CLEAN="${REPO_URL%/}"
-    REPO_NAME="${REPO_URL_CLEAN##*/}"
-    DOWNLOAD_URL="$REPO_URL_CLEAN/-/archive/$REF/$REPO_NAME-$REF.zip"
+    case "$REPO_URL_CLEAN" in
+      https://github.com/*)
+        DOWNLOAD_URL="$REPO_URL_CLEAN/archive/refs/heads/$REF.zip"
+        ;;
+      *)
+        REPO_NAME="${REPO_URL_CLEAN##*/}"
+        DOWNLOAD_URL="$REPO_URL_CLEAN/-/archive/$REF/$REPO_NAME-$REF.zip"
+        ;;
+    esac
 
     curl -L --fail "$DOWNLOAD_URL" -o "$ZIP_PATH"
     if ! is_valid_zip "$ZIP_PATH"; then
