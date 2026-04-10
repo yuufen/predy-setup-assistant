@@ -333,7 +333,7 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 重点检查下面几个字段：
 
 - `target.client` 是你当前要排查的客户端
-- `target.config.state` 是当前客户端配置文件的状态；对 Claude / Cursor / Copilot 会显示 `manual_required`
+- `target.config.state` 是当前客户端配置文件的状态；对 Claude 会显示 `manual_required`，对 Cursor / Copilot 没传 `--project` 时会显示 `project_required`，传了项目路径后会显示 `manual_required`
 - `predy.skill.state=present`
 - `predy.mcp.config.mode=auto`（Codex / CodeWiz）或 `manual_prompt`（Claude / Cursor / Copilot）
 - `predy.mcp.config.state=present`（如果当前目标是 Codex 或 CodeWiz）
