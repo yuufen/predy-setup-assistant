@@ -109,14 +109,16 @@ If `python3` is missing, edit the TOML directly instead of blocking on this scri
 4. Default to the internal registry `http://npm.devops.xiaohongshu.com:7001`. Only override it if project documentation or the user explicitly asks for another package source.
 5. Prefer the beta channel unless the user explicitly asks for stable.
 6. Remember that this skill does not bypass Codex permissions. Homebrew install, system trust changes, and protected writes still require normal approval.
-7. Stop at hard blockers such as missing Homebrew on macOS, missing package source access, or lack of permission to write the target client's config or skill location.
-8. If the user needs to install this setup assistant itself, prefer `install.sh` instead of asking them to clone the repo manually.
-9. Do not ask the user to install `mkcert` or localhost certificates manually before running `predy-skill install`; that command already prepares the local certificate setup.
-10. Do not tell non-Codex users that writing `~/.codex/config.toml` configures their client. It does not.
-11. For Cursor MCP wiring, write `~/.cursor/mcp.json` with `scripts/upsert_cursor_predy_mcp.py`.
-12. For CodeWiz MCP wiring, write `global_mcp_settings.json` with `scripts/upsert_codewiz_predy_mcp.py` instead of pointing at Codex config.
-13. For Codex, Cursor, or CodeWiz MCP wiring, keep a manual prompt fallback available through `scripts/render_manual_mcp_prompt.py`.
-14. For Claude or Copilot MCP wiring, generate the wrapper first and then render a manual prompt with `scripts/render_manual_mcp_prompt.py`.
+7. Treat missing Homebrew on macOS as a hard blocker for the standard Predy install path, but not for installing this setup assistant itself.
+8. Prefer the public `install.sh` bootstrap so Homebrew can be attempted before the user reaches the in-agent Predy install steps, but do not block setup-assistant installation if that attempt fails.
+9. Stop at hard blockers such as missing Homebrew on macOS for the actual Predy install, missing package source access, or lack of permission to write the target client's config or skill location.
+10. If the user needs to install this setup assistant itself, prefer `install.sh` instead of asking them to clone the repo manually.
+11. Do not ask the user to install `mkcert` or localhost certificates manually before running `predy-skill install`; that command already prepares the local certificate setup.
+12. Do not tell non-Codex users that writing `~/.codex/config.toml` configures their client. It does not.
+13. For Cursor MCP wiring, write `~/.cursor/mcp.json` with `scripts/upsert_cursor_predy_mcp.py`.
+14. For CodeWiz MCP wiring, write `global_mcp_settings.json` with `scripts/upsert_codewiz_predy_mcp.py` instead of pointing at Codex config.
+15. For Codex, Cursor, or CodeWiz MCP wiring, keep a manual prompt fallback available through `scripts/render_manual_mcp_prompt.py`.
+16. For Claude or Copilot MCP wiring, generate the wrapper first and then render a manual prompt with `scripts/render_manual_mcp_prompt.py`.
 
 ## Communication Rules
 

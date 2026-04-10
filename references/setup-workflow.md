@@ -116,10 +116,10 @@ scripts/install_targets.sh --copilot --project /path/to/repo
 
 ### If `brew` is missing
 
-1. Explain that Homebrew is the simplest path to install Node on macOS, and `predy-skill install` may also rely on it for certificate tooling.
-2. Explain the result in plain language: "先装一个基础工具管理器，后面 Node 和 Predy 安装都靠它装。"
-3. Ask before running the official Homebrew install command.
-4. After Homebrew is available, continue with Node, then run the Predy install command.
+1. Treat this as a hard blocker for the full Predy install path on macOS, but not for installing this setup assistant itself.
+2. Prefer the public `install.sh` bootstrap command first, because it now attempts the official Homebrew installer before the setup assistant when Homebrew is missing.
+3. Explain the result in plain language: "先尝试装一个基础工具管理器，后面 Node 和 Predy 安装都靠它装。"
+4. If that Homebrew install attempt fails, continue installing the setup assistant and let the later Predy install flow stop on the real blocker with a clearer message.
 
 ### If `node` or `npm` is missing
 

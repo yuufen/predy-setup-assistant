@@ -70,6 +70,47 @@ need_cmd() {
   fi
 }
 
+activate_homebrew() {
+  if command -v brew >/dev/null 2>&1; then
+    return 0
+  fi
+
+  for brew_bin in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [ -x "$brew_bin" ]; then
+      PATH="$(dirname "$brew_bin"):$PATH"
+      export PATH
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+maybe_install_homebrew() {
+  os_name="$(uname -s 2>/dev/null || printf '%s' unknown)"
+  if [ "$os_name" != "Darwin" ]; then
+    return 0
+  fi
+
+  if activate_homebrew; then
+    return 0
+  fi
+
+  need_cmd curl
+
+  printf '%s\n' 'Homebrew is missing on macOS. Trying the official Homebrew installer first. macOS may ask for an administrator password.'
+
+  if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+    if activate_homebrew; then
+      printf '%s\n' 'Homebrew is now available.'
+    else
+      printf '%s\n' 'Homebrew may have installed successfully, but this shell cannot see it yet. Open a new terminal if later install steps still say brew is missing.' >&2
+    fi
+  else
+    printf '%s\n' 'Homebrew installation did not complete. Continuing to install the setup assistant; later Predy install steps may still stop here until Homebrew is installed.' >&2
+  fi
+}
+
 is_valid_zip() {
   unzip -tqq "$1" >/dev/null 2>&1
 }
@@ -221,6 +262,8 @@ fi
 if [ "$REPO_SET" -eq 1 ] && [ "$REPO_URL_SET" -eq 0 ]; then
   REPO_URL="$DEFAULT_REPO_HOST/$REPO"
 fi
+
+maybe_install_homebrew
 
 if [ -n "$SOURCE_DIR" ]; then
   :
