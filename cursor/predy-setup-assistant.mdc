@@ -1,5 +1,5 @@
 ---
-description: Predy setup assistant for installing Predy and diagnosing local setup issues. Cursor MCP config is not auto-written here; render a prompt for Cursor to configure it.
+description: Predy setup assistant for installing Predy and diagnosing local setup issues. Cursor MCP config can be auto-written to ~/.cursor/mcp.json, with a prompt fallback if needed.
 globs:
   - "**/.cursor/rules/**"
   - "**/.github/skills/**"
@@ -28,7 +28,7 @@ Check order:
 2. `brew` on macOS if Node is missing or the Predy install flow later needs it
 3. `~/.predy-skill/certs/localhost.pem`
 4. `~/.predy-skill/certs/localhost-key.pem`
-5. Optional manual MCP prompt output if the user wants Predy MCP in Cursor
+5. Cursor MCP config state under `~/.cursor/mcp.json`
 
 Preferred install command:
 
@@ -52,7 +52,15 @@ scripts/render_predy_mcp_wrapper.sh \
   --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-3. Then render a manual MCP prompt for Cursor:
+3. Auto-write Cursor MCP config:
+
+```bash
+python3 scripts/upsert_cursor_predy_mcp.py \
+  --config "$HOME/.cursor/mcp.json" \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+4. If auto-write is blocked or the user wants a fallback, render a manual MCP prompt for Cursor:
 
 ```bash
 python3 scripts/render_manual_mcp_prompt.py \
@@ -63,5 +71,5 @@ python3 scripts/render_manual_mcp_prompt.py \
 Constraints:
 - This rule does not bypass approvals or sandbox restrictions.
 - Stop and explain the blocker if the machine cannot access the required package source.
-- If the current task is Cursor MCP wiring, return the rendered prompt instead of pretending Cursor is already configured.
+- If Cursor auto-write fails or is blocked, return the rendered prompt instead of pretending Cursor is already configured.
 - Do not treat generic Node or certificate questions as Predy questions unless the user explicitly ties them to Predy.

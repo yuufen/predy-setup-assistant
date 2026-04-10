@@ -100,8 +100,10 @@ ARCH_NAME="$(uname -m 2>/dev/null || printf '%s' unknown)"
 HOME_DIR="${HOME:-}"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME_DIR/.codex}"
 CLAUDE_HOME_DIR="${CLAUDE_HOME:-$HOME_DIR/.claude}"
+CURSOR_HOME_DIR="${CURSOR_HOME:-$HOME_DIR/.cursor}"
 CODEX_CONFIG_PATH="$CODEX_HOME_DIR/config.toml"
 CODEX_BIN_DIR="$CODEX_HOME_DIR/bin"
+CURSOR_MCP_CONFIG_PATH="${CURSOR_MCP_CONFIG_PATH:-$CURSOR_HOME_DIR/mcp.json}"
 CODEWIZ_MCP_CONFIG_PATH="${CODEWIZ_MCP_CONFIG_PATH:-$HOME_DIR/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json}"
 PREDY_CERT_DIR="$HOME_DIR/.predy-skill/certs"
 PREDY_CERT_PATH="$PREDY_CERT_DIR/localhost.pem"
@@ -141,14 +143,20 @@ case "$CLIENT" in
   cursor)
     if [ -n "$PROJECT_DIR" ]; then
       PREDY_SKILL_DIR="$PROJECT_DIR/.cursor/rules/predy-code-assistant.mdc"
-      PREDY_MCP_CONFIG_STATE="manual_required"
     else
       PREDY_SKILL_DIR=""
-      PREDY_MCP_CONFIG_STATE="project_required"
     fi
     PREDY_SKILL_STATE="$(state_from_path file "$PREDY_SKILL_DIR")"
-    TARGET_CONFIG_STATE="$PREDY_MCP_CONFIG_STATE"
-    PREDY_MCP_CONFIG_MODE="manual_prompt"
+    TARGET_CONFIG_PATH="$CURSOR_MCP_CONFIG_PATH"
+    TARGET_CONFIG_STATE="$(file_state "$TARGET_CONFIG_PATH")"
+    PREDY_MCP_CONFIG_PATH="$CURSOR_MCP_CONFIG_PATH"
+    PREDY_MCP_CONFIG_MODE="auto"
+    if [ -f "$CURSOR_MCP_CONFIG_PATH" ] &&
+      grep -Eq '"(predy-mcp|predy)"[[:space:]]*:' "$CURSOR_MCP_CONFIG_PATH"; then
+      PREDY_MCP_CONFIG_STATE="present"
+    else
+      PREDY_MCP_CONFIG_STATE="missing"
+    fi
     ;;
   codewiz)
     if [ -n "$PROJECT_DIR" ]; then

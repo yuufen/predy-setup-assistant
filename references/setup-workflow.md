@@ -74,9 +74,10 @@ This repo is designed to cover multiple assistants:
 
 Important boundary:
 
-- This repo can auto-configure MCP for Codex and CodeWiz.
-- Do not write `~/.codex/config.toml` and claim that Cursor, Claude, or Copilot are now configured for MCP.
-- For Claude, Cursor, and Copilot, this repo should render a manual MCP-setup prompt after it generates the right wrapper command.
+- This repo can auto-configure MCP for Codex, Cursor, and CodeWiz.
+- Do not write `~/.codex/config.toml` and claim that non-Codex clients are now configured for MCP.
+- Keep a manual MCP-setup prompt fallback for Codex, Cursor, and CodeWiz.
+- For Claude and Copilot, render a manual MCP-setup prompt after the wrapper is ready.
 
 For user distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
 
@@ -292,9 +293,35 @@ python3 scripts/upsert_codewiz_predy_mcp.py \
 
 By default this preserves an existing `alwaysAllow` list, or writes the standard Predy `alwaysAllow` tool list for a fresh server entry.
 
-### Claude / Cursor / Copilot manual prompt
+### Cursor auto-config
 
-For these clients, render a prompt after the wrapper is ready.
+After the wrapper exists, upsert the Cursor config with:
+
+```bash
+python3 scripts/upsert_cursor_predy_mcp.py \
+  --config "$HOME/.cursor/mcp.json" \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+### Manual prompt fallback
+
+Use this when automatic MCP writing is unavailable, blocked, or the current client only supports the prompt path here.
+
+`Codex`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client codex \
+  --command "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
+
+`CodeWiz`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client codewiz \
+  --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
+```
 
 `Claude`
 
@@ -347,7 +374,7 @@ Stop and explain the blocker if any of these are true:
 
 1. the machine cannot reach the required package source or registry
 2. Homebrew installation is required but the user does not approve it
-3. the agent cannot write the target skill location, or the relevant MCP config path for Codex / CodeWiz bootstrap
+3. the agent cannot write the target skill location, or the relevant MCP config path for Codex / Cursor / CodeWiz bootstrap
 4. a managed device or local policy blocks certificate trust changes
 
 ## Phrasing For Non-Engineers
@@ -356,5 +383,5 @@ Prefer short explanations like:
 
 - "先补 Node，这样 npm 命令才能跑。"
 - "然后运行 Predy 安装，它会把本地证书和当前客户端需要的 Predy 资产一起准备好。"
-- "如果你现在用的是 Codex 或 CodeWiz，最后再把它的 MCP 配置写好。"
-- "如果你现在用的是 Claude、Cursor 或 Copilot，我给你一条 prompt，让当前客户端自己把 MCP 配好。"
+- "如果你现在用的是 Codex、Cursor 或 CodeWiz，我先尝试自动把它的 MCP 配好；如果自动写失败，我再给你一条 prompt 兜底。"
+- "如果你现在用的是 Claude 或 Copilot，我给你一条 prompt，让当前客户端自己把 MCP 配好。"

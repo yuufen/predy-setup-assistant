@@ -1,8 +1,6 @@
 # Predy Setup Assistant
 
-## 安装说明（给美术 / 设计同学）
-
-这份说明是给不需要写代码、只想把 Predy 装起来的同学准备的。
+## 安装说明
 
 你不需要先安装 `predy-skill`，也不需要先 `git clone` 仓库。
 只要复制下面对应的一段命令到终端里执行，然后按提示操作就可以。
@@ -10,8 +8,8 @@
 先说明一件事：
 
 - 这个仓库可以把 `predy-setup-assistant` 安装到 `Codex`、`Claude`、`Cursor`、`CodeWiz` 等客户端里。
-- 仓库里自带的 MCP 自动配置目前覆盖 `Codex` 和 `CodeWiz`。
-- `Claude`、`Cursor`、`Copilot` 暂时不自动写 MCP 配置；setup assistant 会生成一条 prompt，让对应客户端里的 agent 去配置。
+- 仓库里自带的 MCP 自动配置目前覆盖 `Codex`、`Cursor` 和 `CodeWiz`。
+- `Claude`、`Copilot` 主要走 prompt 配置；`Codex`、`Cursor`、`CodeWiz` 在自动写失败时也有 prompt 兜底。
 - 不要把 `~/.codex/config.toml` 当成 `Claude`、`Cursor`、`CodeWiz` 的通用 MCP 配置地址。
 
 ## 开始前
@@ -38,6 +36,7 @@ $predy-setup-assistant 帮我一步步安装 Predy
 ```
 
 4. 后面如果 Codex 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
+5. 如果你后面还要把 Predy MCP 接进 Codex，setup assistant 会先尝试自动写入配置；如果自动写失败，也可以给你一条 prompt 兜底。
 
 ## 如果你用的是 Claude
 
@@ -77,7 +76,7 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 ```
 
 5. 后面如果 Cursor 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会给你一条可直接复制的 prompt，让 Cursor 自己去配置。
+6. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会先尝试自动写入 `~/.cursor/mcp.json`；如果自动写失败，也会给你一条可直接复制的 prompt 兜底。
 
 ## 如果你用的是 CodeWiz
 
@@ -98,7 +97,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 ```
 
 5. 后面如果 CodeWiz 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 CodeWiz，setup assistant 可以继续自动写入 CodeWiz 的 MCP 配置。
+6. 如果你后面还要把 Predy MCP 接进 CodeWiz，setup assistant 可以继续自动写入 CodeWiz 的 MCP 配置；如果自动写失败，也会给一条 prompt 兜底。
 
 ## 安装过程中常见情况
 
@@ -117,7 +116,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 
 ## 一句话总结
 
-先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex` 和 `CodeWiz` 还可以继续自动配置 MCP；其他客户端会收到一条配置 prompt。
+先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex`、`Cursor`、`CodeWiz` 还可以继续自动配置 MCP；`Claude`、`Copilot` 会收到一条配置 prompt。前面三者如果自动写失败，也有 prompt 兜底。
 
 ## 给工程 / 支持同学的补充说明
 
@@ -283,9 +282,43 @@ python3 ./scripts/upsert_codewiz_predy_mcp.py \
 }
 ```
 
-### 给 Claude / Cursor / Copilot 生成配置 prompt
+### 自动写入 Cursor MCP 配置
 
-这一步适合当前还不支持自动写 MCP 配置的客户端。
+这一步只在 `Cursor` 场景需要。
+
+```bash
+python3 ./scripts/upsert_cursor_predy_mcp.py \
+  --config "$HOME/.cursor/mcp.json" \
+  --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+期望写入的配置块大致如下：
+
+```json
+{
+  "mcpServers": {
+    "predy-mcp": {
+      "command": "/absolute/path/to/.predy-skill/bin/predy-mcp-cursor-beta.sh",
+      "args": []
+    }
+  }
+}
+```
+
+### 生成 MCP 配置 prompt 兜底
+
+这一步是兜底方式：
+
+- `Claude`、`Copilot` 目前主要靠它来配置
+- `Codex`、`Cursor`、`CodeWiz` 自动写失败时，也可以用它兜底
+
+`Codex`
+
+```bash
+python3 ./scripts/render_manual_mcp_prompt.py \
+  --client codex \
+  --command "$HOME/.codex/bin/predy-mcp-beta.sh"
+```
 
 `Claude`
 
@@ -301,6 +334,14 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 python3 ./scripts/render_manual_mcp_prompt.py \
   --client cursor \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
+```
+
+`CodeWiz`
+
+```bash
+python3 ./scripts/render_manual_mcp_prompt.py \
+  --client codewiz \
+  --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
 ```
 
 `Copilot`
@@ -329,6 +370,7 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 
 ```bash
 ./scripts/predy_setup_doctor.sh --client codex
+./scripts/predy_setup_doctor.sh --client cursor --project /path/to/repo
 ./scripts/predy_setup_doctor.sh --client codewiz --project /path/to/repo
 ```
 
@@ -343,10 +385,10 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 重点检查下面几个字段：
 
 - `target.client` 是你当前要排查的客户端
-- `target.config.state` 是当前客户端配置文件的状态；对 Claude 会显示 `manual_required`，对 Cursor / Copilot 没传 `--project` 时会显示 `project_required`，传了项目路径后会显示 `manual_required`
+- `target.config.state` 是当前客户端配置文件的状态；对 Claude / Copilot 会显示 `manual_required`
 - `predy.skill.state=present`
-- `predy.mcp.config.mode=auto`（Codex / CodeWiz）或 `manual_prompt`（Claude / Cursor / Copilot）
-- `predy.mcp.config.state=present`（如果当前目标是 Codex 或 CodeWiz）
+- `predy.mcp.config.mode=auto`（Codex / Cursor / CodeWiz）或 `manual_prompt`（Claude / Copilot）
+- `predy.mcp.config.state=present`（如果当前目标是 Codex / Cursor / CodeWiz）
 - `predy.cert.state=present`
 - `predy.key.state=present`
 
