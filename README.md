@@ -5,13 +5,6 @@
 你不需要先安装 `predy-skill`，也不需要先 `git clone` 仓库。
 只要复制下面对应的一段命令到终端里执行，然后按提示操作就可以。
 
-先说明一件事：
-
-- 这个仓库可以把 `predy-setup-assistant` 安装到 `Codex`、`Claude`、`Cursor`、`CodeWiz` 等客户端里。
-- 仓库里自带的 MCP 自动配置目前覆盖 `Codex`、`Cursor` 和 `CodeWiz`。
-- `Claude`、`Copilot` 主要走 prompt 配置；`Codex`、`Cursor`、`CodeWiz` 在自动写失败时也有 prompt 兜底。
-- 不要把 `~/.codex/config.toml` 当成 `Claude`、`Cursor`、`CodeWiz` 的通用 MCP 配置地址。
-
 ## 开始前
 
 1. 先确认你正在用哪一个 AI 客户端：
