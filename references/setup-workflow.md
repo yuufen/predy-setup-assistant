@@ -259,7 +259,8 @@ That script writes a shell wrapper which:
 
 1. checks for the selected client's Predy asset and localhost certificates
 2. runs the matching `predy-skill install --<client>` command if first-run setup is still missing
-3. starts `predy-skill mcp`
+3. clears stale listeners on the Predy MCP port before startup
+4. starts `predy-skill mcp`
 
 ### Codex auto-config
 

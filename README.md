@@ -313,6 +313,16 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 
 运行后会输出一条中文 prompt。把那条 prompt 直接发给对应客户端里的 agent，让它自己去完成 MCP 配置。
 
+### 启动时的端口冲突处理
+
+生成出来的 wrapper 在启动 `predy-skill mcp` 之前，会先检查 `17654` 端口是不是已经被旧的监听进程占用。
+
+- 如果发现旧进程还在监听，它会先尝试 `kill`
+- 1 秒后端口还没释放，再执行 `kill -9`
+- 默认端口是 `17654`，也可以通过 `PREDY_MCP_PORT` 覆盖
+
+这样可以避免像 `CodeWiz` 这类客户端因为旧的 `predy-mcp` 进程没退出，直接报 `MCP error -32000: Connection closed`
+
 ### 验证
 
 先执行：

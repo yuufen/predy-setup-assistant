@@ -104,6 +104,7 @@ PREDY_HOME="\${PREDY_HOME:-$PREDY_HOME}"
 CODEX_HOME="\${CODEX_HOME:-$CODEX_HOME}"
 CLAUDE_HOME="\${CLAUDE_HOME:-$CLAUDE_HOME}"
 PROJECT_DIR="\${PREDY_MCP_PROJECT_DIR:-$PROJECT_DIR}"
+PORT="\${PREDY_MCP_PORT:-17654}"
 CERT="\$PREDY_HOME/certs/localhost.pem"
 KEY="\$PREDY_HOME/certs/localhost-key.pem"
 
@@ -184,6 +185,37 @@ run_install() {
   fi
 }
 
+find_listener_pids() {
+  if ! command -v lsof >/dev/null 2>&1; then
+    return 0
+  fi
+
+  lsof -nP -t -iTCP:"\$PORT" -sTCP:LISTEN 2>/dev/null || true
+}
+
+cleanup_stale_listener() {
+  stale_pids="\$(find_listener_pids)"
+  [ -n "\$stale_pids" ] || return 0
+
+  printf 'Predy MCP wrapper: stopping stale listener on port %s: %s\n' "\$PORT" "\$stale_pids" >&2
+
+  for pid in \$stale_pids; do
+    [ "\$pid" = "\$\$" ] && continue
+    kill "\$pid" 2>/dev/null || true
+  done
+
+  sleep 1
+  stale_pids="\$(find_listener_pids)"
+  [ -n "\$stale_pids" ] || return 0
+
+  printf 'Predy MCP wrapper: force killing remaining listener on port %s: %s\n' "\$PORT" "\$stale_pids" >&2
+
+  for pid in \$stale_pids; do
+    [ "\$pid" = "\$\$" ] && continue
+    kill -9 "\$pid" 2>/dev/null || true
+  done
+}
+
 needs_init=0
 [ -f "\$CERT" ] || needs_init=1
 [ -f "\$KEY" ] || needs_init=1
@@ -192,6 +224,8 @@ needs_init=0
 if [ "\$needs_init" -eq 1 ]; then
   run_install
 fi
+
+cleanup_stale_listener
 
 if [ -n "\$REGISTRY" ]; then
   exec env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
