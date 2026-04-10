@@ -8,6 +8,18 @@ from typing import Any, Dict, List, Optional
 
 
 DEFAULT_CONFIG = "~/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json"
+DEFAULT_ALWAYS_ALLOW = [
+    "list_predy_tabs_and_compositions",
+    "get_predy_scene_json",
+    "save_project_zip",
+    "load_project_zip",
+    "publish_composition",
+    "snapshot_at_time",
+    "save_project",
+    "duplicate_project",
+    "create_composition_from_image",
+    "create_composition_set_from_folder",
+]
 
 
 def load_config(path: Path) -> Dict[str, Any]:
@@ -37,6 +49,10 @@ def build_server(
 
     if always_allow is not None:
         server["alwaysAllow"] = always_allow
+    elif isinstance(server.get("alwaysAllow"), list):
+        server["alwaysAllow"] = server["alwaysAllow"]
+    else:
+        server["alwaysAllow"] = list(DEFAULT_ALWAYS_ALLOW)
 
     return server
 

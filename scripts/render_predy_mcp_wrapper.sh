@@ -104,8 +104,8 @@ PREDY_HOME="\${PREDY_HOME:-$PREDY_HOME}"
 CODEX_HOME="\${CODEX_HOME:-$CODEX_HOME}"
 CLAUDE_HOME="\${CLAUDE_HOME:-$CLAUDE_HOME}"
 PROJECT_DIR="\${PREDY_MCP_PROJECT_DIR:-$PROJECT_DIR}"
-CERT="\$HOME/.predy-skill/certs/localhost.pem"
-KEY="\$HOME/.predy-skill/certs/localhost-key.pem"
+CERT="\$PREDY_HOME/certs/localhost.pem"
+KEY="\$PREDY_HOME/certs/localhost-key.pem"
 
 case "\$CLIENT" in
   codex)

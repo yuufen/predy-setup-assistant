@@ -255,12 +255,26 @@ python3 ./scripts/upsert_codewiz_predy_mcp.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
 ```
 
+默认会写入一组 Predy 常用工具的 `alwaysAllow` 白名单；如果配置里已经存在同名 server 且已有 `alwaysAllow`，脚本会保留原值。
+
 期望写入的配置块大致如下：
 
 ```json
 {
   "mcpServers": {
     "predy-mcp": {
+      "alwaysAllow": [
+        "list_predy_tabs_and_compositions",
+        "get_predy_scene_json",
+        "save_project_zip",
+        "load_project_zip",
+        "publish_composition",
+        "snapshot_at_time",
+        "save_project",
+        "duplicate_project",
+        "create_composition_from_image",
+        "create_composition_set_from_folder"
+      ],
       "type": "stdio",
       "command": "/absolute/path/to/.predy-skill/bin/predy-mcp-codewiz-beta.sh",
       "args": []
@@ -304,11 +318,13 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 先执行：
 
 ```bash
-./scripts/predy_setup_doctor.sh
+./scripts/predy_setup_doctor.sh --client codex
+./scripts/predy_setup_doctor.sh --client codewiz --project /path/to/repo
 ```
 
 重点检查下面几个字段：
 
+- `target.client` 是你当前要排查的客户端
 - `predy.skill.state=present`
 - `predy.cert.state=present`
 - `predy.key.state=present`

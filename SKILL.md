@@ -58,12 +58,14 @@ Use this for the first pass. It reports:
 
 - OS and architecture
 - `node`, `npm`, `npx`, `python3`, `brew`, `mkcert`
+- the selected target client and optional project path
 - `CODEX_HOME`, `~/.codex/config.toml`, and Predy skill install state when the target is Codex
 - CodeWiz global MCP config state under `~/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json`
 - localhost certificate file state
 - whether a Codex or CodeWiz Predy MCP entry already exists
 
 Treat `mkcert` as a diagnostic signal, not as a standalone installation step that must happen before `predy-skill install`.
+For `cursor`, `codewiz`, or `copilot`, pass `--client` and `--project` so `predy.skill.state` reflects the actual target project.
 
 ### `scripts/render_predy_mcp_wrapper.sh`
 
@@ -83,6 +85,8 @@ Use this to insert or replace a `[mcp_servers.predy]` block in `~/.codex/config.
 ### `scripts/upsert_codewiz_predy_mcp.py`
 
 Use this to insert or replace a `predy-mcp` STDIO server entry in CodeWiz `global_mcp_settings.json`.
+
+It preserves an existing `alwaysAllow` list, or writes the standard Predy `alwaysAllow` tool list for a fresh server entry.
 
 ### `scripts/render_manual_mcp_prompt.py`
 

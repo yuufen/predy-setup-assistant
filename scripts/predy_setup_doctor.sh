@@ -1,6 +1,9 @@
 #!/bin/sh
 set -eu
 
+CLIENT="${PREDY_SETUP_CLIENT:-codex}"
+PROJECT_DIR="${PREDY_SETUP_PROJECT_DIR:-}"
+
 print_kv() {
   printf '%s=%s\n' "$1" "$2"
 }
@@ -37,21 +40,116 @@ dir_state() {
   fi
 }
 
+usage() {
+  cat <<'EOF'
+Usage:
+  ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz|copilot] [--project /path/to/repo]
+
+Notes:
+  - Default client is codex.
+  - --project is required for cursor, codewiz, and copilot if you want target-specific skill state.
+EOF
+}
+
+state_from_path() {
+  kind="$1"
+  target_path="$2"
+
+  if [ -z "$target_path" ]; then
+    printf '%s' 'project_required'
+    return
+  fi
+
+  case "$kind" in
+    file)
+      file_state "$target_path"
+      ;;
+    dir)
+      dir_state "$target_path"
+      ;;
+    *)
+      printf '%s' 'unknown'
+      ;;
+  esac
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --client)
+      CLIENT="${2:?missing value for --client}"
+      shift 2
+      ;;
+    --project)
+      PROJECT_DIR="${2:?missing value for --project}"
+      shift 2
+      ;;
+    --help|-h)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'Unknown argument: %s\n' "$1" >&2
+      exit 1
+      ;;
+  esac
+done
+
 OS_NAME="$(uname -s 2>/dev/null || printf '%s' unknown)"
 ARCH_NAME="$(uname -m 2>/dev/null || printf '%s' unknown)"
 HOME_DIR="${HOME:-}"
 CODEX_HOME_DIR="${CODEX_HOME:-$HOME_DIR/.codex}"
+CLAUDE_HOME_DIR="${CLAUDE_HOME:-$HOME_DIR/.claude}"
 CODEX_CONFIG_PATH="$CODEX_HOME_DIR/config.toml"
 CODEX_BIN_DIR="$CODEX_HOME_DIR/bin"
 CODEWIZ_MCP_CONFIG_PATH="${CODEWIZ_MCP_CONFIG_PATH:-$HOME_DIR/.rcs/storage/default/CodeWiz.codewiz-agent/settings/global_mcp_settings.json}"
-PREDY_SKILL_DIR="$CODEX_HOME_DIR/skills/predy-code-assistant"
 PREDY_CERT_DIR="$HOME_DIR/.predy-skill/certs"
 PREDY_CERT_PATH="$PREDY_CERT_DIR/localhost.pem"
 PREDY_KEY_PATH="$PREDY_CERT_DIR/localhost-key.pem"
 
+case "$CLIENT" in
+  codex)
+    PREDY_SKILL_DIR="$CODEX_HOME_DIR/skills/predy-code-assistant"
+    PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    ;;
+  claude)
+    PREDY_SKILL_DIR="$CLAUDE_HOME_DIR/skills/predy-code-assistant"
+    PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    ;;
+  cursor)
+    if [ -n "$PROJECT_DIR" ]; then
+      PREDY_SKILL_DIR="$PROJECT_DIR/.cursor/rules/predy-code-assistant.mdc"
+    else
+      PREDY_SKILL_DIR=""
+    fi
+    PREDY_SKILL_STATE="$(state_from_path file "$PREDY_SKILL_DIR")"
+    ;;
+  codewiz)
+    if [ -n "$PROJECT_DIR" ]; then
+      PREDY_SKILL_DIR="$PROJECT_DIR/.codewiz/skills/predy-code-assistant"
+    else
+      PREDY_SKILL_DIR=""
+    fi
+    PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    ;;
+  copilot)
+    if [ -n "$PROJECT_DIR" ]; then
+      PREDY_SKILL_DIR="$PROJECT_DIR/.github/skills/predy-code-assistant"
+    else
+      PREDY_SKILL_DIR=""
+    fi
+    PREDY_SKILL_STATE="$(state_from_path dir "$PREDY_SKILL_DIR")"
+    ;;
+  *)
+    printf 'Unknown client: %s\n' "$CLIENT" >&2
+    exit 1
+    ;;
+esac
+
 print_kv "os.name" "$OS_NAME"
 print_kv "os.arch" "$ARCH_NAME"
 print_kv "home.dir" "$HOME_DIR"
+print_kv "target.client" "$CLIENT"
+print_kv "target.project" "${PROJECT_DIR:-}"
 print_kv "codex.home" "$CODEX_HOME_DIR"
 print_kv "codex.config" "$CODEX_CONFIG_PATH"
 print_kv "codex.config.state" "$(file_state "$CODEX_CONFIG_PATH")"
@@ -60,7 +158,7 @@ print_kv "codex.bin.state" "$(dir_state "$CODEX_BIN_DIR")"
 print_kv "codewiz.mcp.config" "$CODEWIZ_MCP_CONFIG_PATH"
 print_kv "codewiz.mcp.config.state" "$(file_state "$CODEWIZ_MCP_CONFIG_PATH")"
 print_kv "predy.skill.dir" "$PREDY_SKILL_DIR"
-print_kv "predy.skill.state" "$(dir_state "$PREDY_SKILL_DIR")"
+print_kv "predy.skill.state" "$PREDY_SKILL_STATE"
 print_kv "predy.cert.path" "$PREDY_CERT_PATH"
 print_kv "predy.cert.state" "$(file_state "$PREDY_CERT_PATH")"
 print_kv "predy.key.path" "$PREDY_KEY_PATH"

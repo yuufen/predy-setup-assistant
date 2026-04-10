@@ -287,6 +287,8 @@ python3 scripts/upsert_codewiz_predy_mcp.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-codewiz-beta.sh"
 ```
 
+By default this preserves an existing `alwaysAllow` list, or writes the standard Predy `alwaysAllow` tool list for a fresh server entry.
+
 ### Claude / Cursor / Copilot manual prompt
 
 For these clients, render a prompt after the wrapper is ready.
@@ -321,7 +323,7 @@ Give the rendered prompt to the current client and let its agent finish the MCP 
 
 After MCP setup, confirm:
 
-1. `scripts/predy_setup_doctor.sh` shows `present` for localhost certificates and the relevant auto-config MCP block; for Codex it also shows the installed skill path
+1. `scripts/predy_setup_doctor.sh --client <client> [--project /path/to/repo]` shows `present` for localhost certificates, the target-specific skill path, and the relevant auto-config MCP block
 2. the wrapper script exists and is executable
 3. the client-specific config points at the expected absolute path when that client supports auto-config here
 
