@@ -33,10 +33,9 @@ Use its output to classify the machine into one of these states:
 
 1. Missing package manager prerequisites
 2. Missing Node/npm
-3. Missing mkcert
-4. Missing Predy install or localhost certs
-5. Missing Codex MCP config only
-6. Fully installed but broken at runtime
+3. Missing Predy install or localhost certs
+4. Missing Codex MCP config only
+5. Fully installed but broken at runtime
 
 Fix the earliest missing prerequisite first.
 
@@ -111,10 +110,10 @@ scripts/install_targets.sh --copilot --project /path/to/repo
 
 ### If `brew` is missing
 
-1. Explain that Homebrew is the simplest path to install Node and mkcert.
-2. Explain the result in plain language: "先装一个基础工具管理器，后面 Node 和证书工具都靠它装。"
+1. Explain that Homebrew is the simplest path to install Node on macOS, and `predy-skill install --codex` may also rely on it for certificate tooling.
+2. Explain the result in plain language: "先装一个基础工具管理器，后面 Node 和 Predy 安装都靠它装。"
 3. Ask before running the official Homebrew install command.
-4. After Homebrew is available, continue with Node and mkcert.
+4. After Homebrew is available, continue with Node, then run the Predy install command.
 
 ### If `node` or `npm` is missing
 
@@ -134,13 +133,9 @@ npx --version
 
 ### If `mkcert` is missing
 
-Run:
+Do not treat this as a standalone prerequisite.
 
-```bash
-brew install mkcert
-```
-
-Do not call `mkcert -install` manually first if the next step is `predy-skill install --codex`, because that command already prepares local certificates.
+After `node` and `npm` are available, run `predy-skill install --codex` first. That command already prepares local certificates and installs certificate tooling when needed.
 
 ## Predy Install Flow
 
@@ -156,7 +151,8 @@ This should:
 
 1. Install the Codex skill payload
 2. Build or use the bundled MCP server assets
-3. Prepare localhost certificates under `~/.predy-skill/certs`
+3. Install or reuse certificate tooling when needed
+4. Prepare localhost certificates under `~/.predy-skill/certs`
 
 After install, verify:
 
@@ -241,6 +237,5 @@ Stop and explain the blocker if any of these are true:
 Prefer short explanations like:
 
 - "先补 Node，这样 npm 命令才能跑。"
-- "再补证书工具，这样浏览器才能信任本地 `wss://localhost`。"
-- "然后安装 Predy，把证书和 Codex skill 一起准备好。"
+- "然后运行 Predy 安装，它会把本地证书和 Codex skill 一起准备好。"
 - "最后写一条 Codex MCP 配置，让它以后自己能拉起 Predy 服务。"

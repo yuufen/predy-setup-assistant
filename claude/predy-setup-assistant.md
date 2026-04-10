@@ -19,11 +19,10 @@ Default operating rules:
 Check order:
 
 1. `node`, `npm`, `npx`
-2. `brew` on macOS if Node or mkcert is missing
-3. `mkcert`
-4. `~/.predy-skill/certs/localhost.pem`
-5. `~/.predy-skill/certs/localhost-key.pem`
-6. `~/.codex/config.toml`
+2. `brew` on macOS if Node is missing or the Predy install flow later needs it
+3. `~/.predy-skill/certs/localhost.pem`
+4. `~/.predy-skill/certs/localhost-key.pem`
+5. `~/.codex/config.toml`
 
 Preferred Predy install command:
 
@@ -32,6 +31,8 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
   npm exec --yes --package=@predy-js/skill@beta -- \
   predy-skill install --codex
 ```
+
+Do not ask the user to install `mkcert` or local certificates manually before this command. It already prepares the local certificate setup when needed.
 
 Preferred MCP bootstrap pattern:
 

@@ -62,6 +62,8 @@ Use this for the first pass. It reports:
 - localhost certificate file state
 - whether a `[mcp_servers.predy]` block already exists
 
+Treat `mkcert` as a diagnostic signal, not as a standalone installation step that must happen before `predy-skill install --codex`.
+
 ### `scripts/render_predy_mcp_wrapper.sh`
 
 Use this to create an idempotent wrapper script that:
@@ -70,6 +72,7 @@ Use this to create an idempotent wrapper script that:
 - defaults to the internal registry `http://npm.devops.xiaohongshu.com:7001`
 - still allows overriding the registry through `PREDY_NPM_REGISTRY` or `--registry`
 - self-heals first-run setup by calling `predy-skill install --codex` before `predy-skill mcp`
+- relies on that install command to prepare local certificates automatically when needed
 
 ### `scripts/upsert_codex_predy_mcp.py`
 
@@ -87,14 +90,15 @@ If `python3` is missing, edit the TOML directly instead of blocking on this scri
 6. Remember that this skill does not bypass Codex permissions. Homebrew install, system trust changes, and protected writes still require normal approval.
 7. Stop at hard blockers such as missing Homebrew on macOS, missing package source access, or lack of permission to write `~/.codex`.
 8. If the user needs to install this setup assistant itself, prefer `install.sh` instead of asking them to clone the repo manually.
+9. Do not ask the user to install `mkcert` or localhost certificates manually before running `predy-skill install --codex`; that command already prepares the local certificate setup.
 
 ## Communication Rules
 
 1. Give one next action at a time for non-engineer users.
 2. Prefer outcome-based phrasing such as:
    - 先装 Node，这样安装命令才能跑
-   - 再装证书工具，这样浏览器才会信任本地连接
-   - 再把 Predy 和 MCP 配好，后面就不用重复折腾
+   - 再运行 Predy 安装命令，它会把本地证书一起准备好
+   - 再把 MCP 配好，后面就不用重复折腾
 3. If the environment is blocked, say exactly what is missing instead of dumping a long checklist.
 
 ## References

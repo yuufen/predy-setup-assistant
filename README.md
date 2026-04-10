@@ -30,7 +30,7 @@ bash /tmp/predy-setup-install.sh --codex
 $predy-setup-assistant 帮我一步步安装 Predy
 ```
 
-4. 后面如果 Codex 提示你要安装 Node、证书工具或者写配置，按提示确认即可。
+4. 后面如果 Codex 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
 
 ## 如果你用的是 Claude
 
@@ -48,7 +48,7 @@ bash /tmp/predy-setup-install.sh --claude
 请使用 predy-setup-assistant 帮我一步步安装 Predy
 ```
 
-4. 后面如果 Claude 提示你要安装 Node、证书工具或者写配置，按提示确认即可。
+4. 后面如果 Claude 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
 
 ## 如果你用的是 Cursor
 
@@ -68,7 +68,7 @@ bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
 帮我一步步安装 Predy
 ```
 
-5. 后面如果 Cursor 提示你要安装 Node、证书工具或者写配置，按提示确认即可。
+5. 后面如果 Cursor 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
 
 ## 如果你用的是 CodeWiz
 
@@ -88,14 +88,15 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 帮我一步步安装 Predy
 ```
 
-5. 后面如果 CodeWiz 提示你要安装 Node、证书工具或者写配置，按提示确认即可。
+5. 后面如果 CodeWiz 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
 
 ## 安装过程中常见情况
 
 1. 如果终端提示你允许下载、允许访问网络、允许写入配置，正常确认即可。
 2. 如果系统提示你输入 Mac 登录密码，这通常是正常的，因为它可能在安装基础工具或本地证书。
-3. 如果 AI 提示你要安装 Homebrew、Node 或 mkcert，这也是正常步骤，不用自己提前折腾。
-4. 如果浏览器或系统提示你信任本地证书，按提示操作即可。
+3. 如果 AI 提示你要安装 Homebrew 或 Node，这是正常步骤，不用自己提前折腾。
+4. 本地证书和 `mkcert` 会在 `predy-skill install --codex` 时自动处理，不需要你先手动安装证书工具。
+5. 如果浏览器或系统提示你信任本地证书，按提示操作即可。
 
 ## 什么情况需要找工程同学
 
@@ -106,7 +107,7 @@ bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
 
 ## 一句话总结
 
-先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、证书、MCP 和 Predy 本体都会按步骤带你完成。
+先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy、本地证书和 MCP 都会按步骤带你完成。
 
 ## 给工程 / 支持同学的补充说明
 
