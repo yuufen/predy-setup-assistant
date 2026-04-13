@@ -33,6 +33,7 @@ If the current host already reveals the client, use that host as the default tar
 
 - `.codewiz/skills/...` means CodeWiz
 - `.cursor/...` means Cursor
+- `.github/skills/...` means Copilot
 - `~/.claude/...` means Claude
 - `~/.codex/...` means Codex
 
@@ -79,16 +80,17 @@ This repo is designed to cover multiple assistants:
 2. Claude uses `claude/predy-setup-assistant.md`.
 3. Cursor uses `cursor/predy-setup-assistant.mdc`.
 4. CodeWiz can consume the root skill folder as a copied skill payload.
+5. Copilot can consume the root skill folder under `.github/skills`.
 
 Important boundary:
 
 - This repo can auto-configure MCP for Codex, Cursor, and CodeWiz.
 - Do not write `~/.codex/config.toml` and claim that non-Codex clients are now configured for MCP.
 - Keep a manual MCP-setup prompt fallback for Codex, Cursor, and CodeWiz.
-- For Claude, render a manual MCP-setup prompt after the wrapper is ready.
+- For Claude or Copilot, render a manual MCP-setup prompt after the wrapper is ready.
 
 For user distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
-If the user runs `install.sh` without client flags in a normal terminal, it will ask which client to install for and, for Cursor or CodeWiz, prompt for a project path when needed.
+If the user runs `install.sh` without client flags in a normal terminal, it will ask which client to install for and, for Cursor, CodeWiz, or Copilot, prompt for a project path when needed.
 
 Use `scripts/install_targets.sh` only when you already have a local copy of the repo and want a direct local install.
 
@@ -116,6 +118,7 @@ scripts/install_targets.sh --codex
 scripts/install_targets.sh --claude
 scripts/install_targets.sh --cursor --project /path/to/repo
 scripts/install_targets.sh --codewiz --project /path/to/repo
+scripts/install_targets.sh --copilot --project /path/to/repo
 ```
 
 ## macOS Repair Order
@@ -185,6 +188,14 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
   predy-skill install --codewiz --project /path/to/repo
 ```
 
+`Copilot`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
+  npm exec --yes --package=@predy-js/skill@beta -- \
+  predy-skill install --copilot --project /path/to/repo
+```
+
 All of these go through the same `install` command and therefore:
 
 1. Install the selected client's skill asset
@@ -198,6 +209,7 @@ After install, verify the target-specific skill asset plus the shared certificat
 - `~/.claude/skills/predy-code-assistant` and `~/.claude/agents/predy-code-assistant.md` for Claude
 - `<project>/.cursor/rules/predy-code-assistant.mdc` for Cursor
 - `<project>/.codewiz/skills/predy-code-assistant` for CodeWiz
+- `<project>/.github/skills/predy-code-assistant` for Copilot
 - `~/.predy-skill/certs/localhost.pem`
 - `~/.predy-skill/certs/localhost-key.pem`
 
@@ -241,6 +253,15 @@ scripts/render_predy_mcp_wrapper.sh \
   --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
+`Copilot`
+
+```bash
+scripts/render_predy_mcp_wrapper.sh \
+  --client copilot \
+  --project /path/to/repo \
+  --output "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
+```
+
 That script writes a shell wrapper which:
 
 1. starts the globally installed `predy-skill mcp`
@@ -275,6 +296,13 @@ predy-skill install --claude
 ```bash
 env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
 predy-skill install --cursor --project /path/to/repo
+```
+
+`Copilot`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --copilot --project /path/to/repo
 ```
 
 From that point on:
@@ -359,6 +387,14 @@ python3 scripts/render_manual_mcp_prompt.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
+`Copilot`
+
+```bash
+python3 scripts/render_manual_mcp_prompt.py \
+  --client copilot \
+  --command "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
+```
+
 Give the rendered prompt to the current client and let its agent finish the MCP configuration there.
 
 ## Verification
@@ -404,4 +440,4 @@ Prefer short explanations like:
 - "先补 Node，这样 npm 命令才能跑。"
 - "然后运行 Predy 安装，它会把本地证书和当前客户端需要的 Predy 资产一起准备好。"
 - "如果你现在用的是 Codex、Cursor 或 CodeWiz，我先尝试自动把它的 MCP 配好；如果自动写失败，我再给你一条 prompt 兜底。"
-- "如果你现在用的是 Claude，我给你一条 prompt，让当前客户端自己把 MCP 配好。"
+- "如果你现在用的是 Claude 或 Copilot，我给你一条 prompt，让当前客户端自己把 MCP 配好。"

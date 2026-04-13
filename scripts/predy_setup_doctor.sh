@@ -43,7 +43,7 @@ dir_state() {
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz] [--project /path/to/repo]
+  ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz|copilot] [--project /path/to/repo]
 
 Notes:
   - Pass --client to check the target client's skill and MCP state.
