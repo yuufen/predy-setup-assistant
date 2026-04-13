@@ -45,9 +45,10 @@ Fix the earliest missing prerequisite first.
 
 1. Default registry: `http://npm.devops.xiaohongshu.com:7001`
 2. Prefer `@predy-js/skill@beta` unless the user explicitly asks for stable.
-3. Do not ask the user to install a global `predy-skill` binary unless they specifically want a global command.
-4. If another registry is required, override the default through `PREDY_NPM_REGISTRY`, `NPM_CONFIG_REGISTRY`, or `--registry`.
-5. Prefer the target-specific install command from the Predy Install Flow section. If the target is Codex, for example:
+3. For one-shot Predy install or repair, prefer `npm exec --package=@predy-js/skill@beta -- predy-skill ...`.
+4. For a long-running client MCP startup command, do not point the client directly at `npm exec`. Generate a wrapper and use a globally installed `predy-skill` runtime.
+5. If another registry is required, override the default through `PREDY_NPM_REGISTRY`, `NPM_CONFIG_REGISTRY`, or `--registry`.
+6. Prefer the target-specific install command from the Predy Install Flow section. If the target is Codex, for example:
 
 ```bash
 env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
@@ -206,9 +207,9 @@ After install, verify the target-specific skill asset plus the shared certificat
 
 ## Client MCP Bootstrap
 
-Generate a wrapper first. The wrapper keeps following the current beta package and can self-heal first-run setup.
+Generate a wrapper first. The wrapper is the stable local startup command that the client MCP manager should execute.
 
-Explain it in user language as: "给客户端放一个启动脚本，以后它每次都能自己把 Predy 拉起来。"
+Explain it in user language as: "给客户端放一个稳定启动脚本，以后客户端只跑这一个本地脚本，不再在启动时临时联网安装。"
 
 `Codex`
 
@@ -255,10 +256,52 @@ scripts/render_predy_mcp_wrapper.sh \
 
 That script writes a shell wrapper which:
 
-1. checks for the selected client's Predy asset and localhost certificates
-2. runs the matching `predy-skill install --<client>` command if first-run setup is still missing
-3. clears stale listeners on the Predy MCP port before startup
-4. starts `predy-skill mcp`
+1. clears stale listeners on the Predy MCP port before every startup
+2. starts the globally installed `predy-skill mcp`
+3. keeps the client MCP manager on one stable local command path
+
+After the wrapper exists, initialize the runtime once with a global install plus the target-specific `predy-skill install`:
+
+`Codex`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --codex
+```
+
+`CodeWiz`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --codewiz --project /path/to/repo
+```
+
+`Claude`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --claude
+```
+
+`Cursor`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --cursor --project /path/to/repo
+```
+
+`Copilot`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --copilot --project /path/to/repo
+```
+
+From that point on:
+
+1. the client MCP manager should execute the wrapper itself with no extra args
+2. updates should happen out-of-band by repeating the same global install plus `predy-skill install` commands
+3. stale-port recovery should happen automatically the next time the client re-runs the same wrapper startup command
 
 ### Codex auto-config
 

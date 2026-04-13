@@ -53,7 +53,14 @@ Preferred Predy MCP bootstrap:
   --output "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-4. Auto-write Cursor MCP config:
+4. Initialize or refresh the global beta runtime before wiring Cursor to that wrapper:
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --cursor --project /path/to/repo
+```
+
+5. Auto-write Cursor MCP config:
 
 ```bash
 python3 ./.cursor/predy-setup-assistant/scripts/upsert_cursor_predy_mcp.py \
@@ -61,13 +68,15 @@ python3 ./.cursor/predy-setup-assistant/scripts/upsert_cursor_predy_mcp.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-5. If auto-write is blocked or the user wants a fallback, render a manual MCP prompt for Cursor:
+6. If auto-write is blocked or the user wants a fallback, render a manual MCP prompt for Cursor:
 
 ```bash
 python3 ./.cursor/predy-setup-assistant/scripts/render_manual_mcp_prompt.py \
   --client cursor \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
+
+Do not tell Cursor to use `npm exec --package=@predy-js/skill@beta -- predy-skill mcp` as the MCP startup command. The wrapper should be the long-running startup command, and stale-port recovery should happen automatically the next time Cursor re-runs that same wrapper.
 
 Constraints:
 - This rule does not bypass approvals or sandbox restrictions.

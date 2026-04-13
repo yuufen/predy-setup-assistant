@@ -45,7 +45,14 @@ scripts/render_predy_mcp_wrapper.sh \
   --output "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
 ```
 
-3. Then render a manual MCP prompt for Claude:
+3. Initialize or refresh the global beta runtime before wiring Claude to that wrapper:
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --claude
+```
+
+4. Then render a manual MCP prompt for Claude:
 
 ```bash
 python3 scripts/render_manual_mcp_prompt.py \
@@ -53,7 +60,9 @@ python3 scripts/render_manual_mcp_prompt.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-claude-beta.sh"
 ```
 
-4. Give that rendered prompt back to the user, or paste it into Claude when the user wants you to finish the MCP setup there.
+5. Give that rendered prompt back to the user, or paste it into Claude when the user wants you to finish the MCP setup there.
+
+Do not tell Claude to run `npm exec --package=@predy-js/skill@beta -- predy-skill mcp` as its long-running MCP startup command. The wrapper should be the startup command, and future beta refreshes should happen by repeating the global install plus `predy-skill install --claude`.
 
 Stop and explain the blocker if:
 

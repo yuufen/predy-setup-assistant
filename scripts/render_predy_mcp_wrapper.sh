@@ -97,92 +97,74 @@ cat > "$OUTPUT" <<EOF
 #!/bin/sh
 set -eu
 
-REGISTRY="$REGISTRY"
-PACKAGE="$PACKAGE"
 CLIENT="$CLIENT"
 PREDY_HOME="\${PREDY_HOME:-$PREDY_HOME}"
 CODEX_HOME="\${CODEX_HOME:-$CODEX_HOME}"
 CLAUDE_HOME="\${CLAUDE_HOME:-$CLAUDE_HOME}"
 PROJECT_DIR="\${PREDY_MCP_PROJECT_DIR:-$PROJECT_DIR}"
 PORT="\${PREDY_MCP_PORT:-17654}"
-CERT="\$PREDY_HOME/certs/localhost.pem"
-KEY="\$PREDY_HOME/certs/localhost-key.pem"
 
-case "\$CLIENT" in
-  codex)
-    SKILL_PATH="\$CODEX_HOME/skills/predy-code-assistant"
-    ;;
-  claude)
-    SKILL_PATH="\$CLAUDE_HOME/skills/predy-code-assistant"
-    ;;
-  cursor)
-    SKILL_PATH="\$PROJECT_DIR/.cursor/rules/predy-code-assistant.mdc"
-    ;;
-  codewiz)
-    SKILL_PATH="\$PROJECT_DIR/.codewiz/skills/predy-code-assistant"
-    ;;
-  copilot)
-    SKILL_PATH="\$PROJECT_DIR/.github/skills/predy-code-assistant"
-    ;;
-  *)
-    printf 'Unknown client in wrapper: %s\n' "\$CLIENT" >&2
-    exit 1
-    ;;
-esac
+fail() {
+  printf '%s\n' "\$1" >&2
+  exit 1
+}
 
-run_install() {
-  if [ -n "\$REGISTRY" ]; then
-    case "\$CLIENT" in
-      codex)
-        env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-          npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --codex
-        ;;
-      claude)
-        env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-          npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --claude
-        ;;
-      cursor)
-        env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-          npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --cursor --project "\$PROJECT_DIR"
-        ;;
-      codewiz)
-        env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-          npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --codewiz --project "\$PROJECT_DIR"
-        ;;
-      copilot)
-        env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-          npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --copilot --project "\$PROJECT_DIR"
-        ;;
-    esac
+print_install_hint() {
+  if [ -n "$REGISTRY" ]; then
+    printf 'env NPM_CONFIG_REGISTRY=%s npm i -g %s\n' "$REGISTRY" "$PACKAGE" >&2
   else
-    case "\$CLIENT" in
-      codex)
-        npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --codex
-        ;;
-      claude)
-        npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --claude
-        ;;
-      cursor)
-        npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --cursor --project "\$PROJECT_DIR"
-        ;;
-      codewiz)
-        npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --codewiz --project "\$PROJECT_DIR"
-        ;;
-      copilot)
-        npm exec --yes --package="\$PACKAGE" -- \\
-          predy-skill install --copilot --project "\$PROJECT_DIR"
-        ;;
-    esac
+    printf 'npm i -g %s\n' "$PACKAGE" >&2
   fi
+
+  case "\$CLIENT" in
+    codex)
+      printf 'predy-skill install --codex\n' >&2
+      ;;
+    claude)
+      printf 'predy-skill install --claude\n' >&2
+      ;;
+    cursor)
+      printf 'predy-skill install --cursor --project %s\n' "\$PROJECT_DIR" >&2
+      ;;
+    codewiz)
+      printf 'predy-skill install --codewiz --project %s\n' "\$PROJECT_DIR" >&2
+      ;;
+    copilot)
+      printf 'predy-skill install --copilot --project %s\n' "\$PROJECT_DIR" >&2
+      ;;
+  esac
+}
+
+resolve_predy_skill_bin() {
+  if [ -n "\${PREDY_SKILL_BIN:-}" ] && [ -x "\$PREDY_SKILL_BIN" ]; then
+    printf '%s\n' "\$PREDY_SKILL_BIN"
+    return 0
+  fi
+
+  if command -v npm >/dev/null 2>&1; then
+    npm_prefix="\$(npm prefix -g 2>/dev/null || npm config get prefix 2>/dev/null || true)"
+    if [ -n "\$npm_prefix" ] && [ -x "\$npm_prefix/bin/predy-skill" ]; then
+      printf '%s\n' "\$npm_prefix/bin/predy-skill"
+      return 0
+    fi
+  fi
+
+  if command -v predy-skill >/dev/null 2>&1; then
+    command -v predy-skill
+    return 0
+  fi
+
+  return 1
+}
+
+require_predy_skill_bin() {
+  predy_skill_bin="\$(resolve_predy_skill_bin || true)"
+  if [ -z "\$predy_skill_bin" ]; then
+    printf '%s\n' 'predy-skill is not installed globally yet. Run these commands first:' >&2
+    print_install_hint
+    exit 1
+  fi
+  printf '%s\n' "\$predy_skill_bin"
 }
 
 find_listener_pids() {
@@ -193,18 +175,13 @@ find_listener_pids() {
   lsof -nP -t -iTCP:"\$PORT" -sTCP:LISTEN 2>/dev/null || true
 }
 
-cleanup_stale_listener() {
-  stale_pids="\$(find_listener_pids)"
-  [ -n "\$stale_pids" ] || return 0
+stop_existing_listener() {
+  predy_skill_bin="\$(resolve_predy_skill_bin || true)"
+  if [ -n "\$predy_skill_bin" ]; then
+    "\$predy_skill_bin" kill-mcp --port "\$PORT" >/dev/null 2>&1 || \\
+      "\$predy_skill_bin" kill-mcp --port "\$PORT" --force >/dev/null 2>&1 || true
+  fi
 
-  printf 'Predy MCP wrapper: stopping stale listener on port %s: %s\n' "\$PORT" "\$stale_pids" >&2
-
-  for pid in \$stale_pids; do
-    [ "\$pid" = "\$\$" ] && continue
-    kill "\$pid" 2>/dev/null || true
-  done
-
-  sleep 1
   stale_pids="\$(find_listener_pids)"
   [ -n "\$stale_pids" ] || return 0
 
@@ -216,25 +193,9 @@ cleanup_stale_listener() {
   done
 }
 
-needs_init=0
-[ -f "\$CERT" ] || needs_init=1
-[ -f "\$KEY" ] || needs_init=1
-[ -e "\$SKILL_PATH" ] || needs_init=1
-
-if [ "\$needs_init" -eq 1 ]; then
-  run_install
-fi
-
-cleanup_stale_listener
-
-if [ -n "\$REGISTRY" ]; then
-  exec env NPM_CONFIG_REGISTRY="\$REGISTRY" \\
-    npm exec --yes --package="\$PACKAGE" -- \\
-    predy-skill mcp
-else
-  exec npm exec --yes --package="\$PACKAGE" -- \\
-    predy-skill mcp
-fi
+predy_skill_bin="\$(require_predy_skill_bin)"
+stop_existing_listener
+exec env PREDY_MCP_WS_PORT="\$PORT" "\$predy_skill_bin" mcp
 EOF
 
 chmod +x "$OUTPUT"

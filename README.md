@@ -15,7 +15,7 @@
 
 ## 如果你用的是 Codex
 
-1. 把下面这两行命令复制到终端里执行：
+1. 把下面这条命令复制到终端里执行：
 
 ```bash
 curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codex
@@ -33,7 +33,7 @@ $predy-setup-assistant 帮我一步步安装 Predy
 
 ## 如果你用的是 Claude
 
-1. 把下面这两行命令复制到终端里执行：
+1. 把下面这条命令复制到终端里执行：
 
 ```bash
 curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --claude
@@ -53,7 +53,7 @@ curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/
 
 1. 先在终端里进入你当前项目的目录。
    如果你不知道项目目录是什么，先找工程同学确认。
-2. 进入项目目录后，执行下面这两行命令：
+2. 进入项目目录后，执行下面这条命令：
 
 ```bash
 curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
@@ -74,7 +74,7 @@ curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/
 
 1. 先在终端里进入你当前项目的目录。
    如果你不知道项目目录是什么，先找工程同学确认。
-2. 进入项目目录后，执行下面这两行命令：
+2. 进入项目目录后，执行下面这条命令：
 
 ```bash
 curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
@@ -168,6 +168,9 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
 
 不同客户端都可以复用同一个 wrapper 生成脚本，区别只在 `--client` 和是否需要 `--project`。
 
+这里生成出来的 wrapper 才是推荐交给客户端 MCP 管理器的启动命令。
+不要把 `npm exec --package=@predy-js/skill@beta -- predy-skill mcp` 直接写进 MCP 配置里，因为那样会把更新、联网和启动都混在一次启动流程里，容易造成断连。
+
 `Codex`
 
 ```bash
@@ -211,11 +214,48 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
   --output "$HOME/.predy-skill/bin/predy-mcp-copilot-beta.sh"
 ```
 
-如果你想覆盖默认包源，也可以在上面任一命令里追加：
+MCP 管理器真正启动时，只需要执行 wrapper 本身，不带额外参数。
+
+### 初始化或更新 Predy MCP runtime
+
+第一次接 MCP 前，先手动做一次全局安装和客户端安装。以后要更新 beta，也重复同一套命令。
+
+`Codex`
 
 ```bash
---registry "http://npm.devops.xiaohongshu.com:7001" --package "@predy-js/skill@beta"
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --codex
 ```
+
+`CodeWiz`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --codewiz --project /path/to/repo
+```
+
+`Claude`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --claude
+```
+
+`Cursor`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --cursor --project /path/to/repo
+```
+
+`Copilot`
+
+```bash
+env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 npm i -g @predy-js/skill@beta
+predy-skill install --copilot --project /path/to/repo
+```
+
+做完这一步之后，客户端 MCP 管理器再去调用 wrapper。
 
 ### 自动写入 Codex MCP 配置
 
@@ -345,15 +385,21 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 
 运行后会输出一条中文 prompt。把那条 prompt 直接发给对应客户端里的 agent，让它自己去完成 MCP 配置。
 
-### 启动时的端口冲突处理
+### 端口占用和重新拉起
 
-生成出来的 wrapper 在启动 `predy-skill mcp` 之前，会先检查 `17654` 端口是不是已经被旧的监听进程占用。
+推荐把“更新”和“启动”拆开：
 
-- 如果发现旧进程还在监听，它会先尝试 `kill`
-- 1 秒后端口还没释放，再执行 `kill -9`
+- 日常启动：由客户端 MCP 管理器直接调用 wrapper
+- 更新 beta：手动重新执行上一节那套 `npm i -g ...` + `predy-skill install ...`
+- 端口被旧进程占用：不用额外配一条“重启命令”；客户端下次再拉起同一条 wrapper 启动命令时，wrapper 会先清旧端口，再启动新的 `predy-skill mcp`
+
+wrapper 在启动前会先尝试清理 `17654` 端口上的旧 Predy MCP 监听；如果 `predy-skill kill-mcp` 没清干净，再回退到本地 `lsof + kill -9`。这能处理“端口还被旧的 predy-mcp 占着，但 Codex / CodeWiz 已经和它断开”的情况。
+
+注意：
+
+- 客户端重新拉起 wrapper 时，会杀掉旧的 Predy MCP 进程，再拉起新的
+- 浏览器侧如果连着 `ws://127.0.0.1:17654` 或 `wss://localhost:17654`，这时会断一下，然后依赖页面自己的自动重连
 - 默认端口是 `17654`，也可以通过 `PREDY_MCP_PORT` 覆盖
-
-这样可以避免像 `CodeWiz` 这类客户端因为旧的 `predy-mcp` 进程没退出，直接报 `MCP error -32000: Connection closed`
 
 ### 验证
 
@@ -377,6 +423,7 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 
 - `target.client` 是你当前要排查的客户端
 - `target.config.state` 是当前客户端配置文件的状态；对 Claude / Copilot 会显示 `manual_required`
+- `tool.predy-skill.path` 在跑过 wrapper `update` 之后应该不再是 `MISSING`
 - `predy.skill.state=present`
 - `predy.mcp.config.mode=auto`（Codex / Cursor / CodeWiz）或 `manual_prompt`（Claude / Copilot）
 - `predy.mcp.config.state=present`（如果当前目标是 Codex / Cursor / CodeWiz）
