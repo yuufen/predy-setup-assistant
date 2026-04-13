@@ -42,6 +42,7 @@ usage() {
   --claude                为 Claude 安装
   --cursor                为 Cursor 安装
   --codewiz               为 CodeWiz 安装
+  --copilot               为 Copilot 安装
   --project <path>        项目型安装的目标项目路径
   --codex-home <path>     覆盖 CODEX_HOME
   --claude-home <path>    覆盖 Claude home
@@ -118,6 +119,7 @@ select_target_interactively() {
   printf '%s\n' '  2) Claude' >&2
   printf '%s\n' '  3) Cursor' >&2
   printf '%s\n' '  4) CodeWiz' >&2
+  printf '%s\n' '  5) Copilot' >&2
 
   while :; do
     choice="$(read_line '请输入编号（默认值：1）：')"
@@ -137,6 +139,11 @@ select_target_interactively() {
         ;;
       4)
         INSTALL_CODEWIZ=1
+        prompt_project_dir
+        return 0
+        ;;
+      5)
+        INSTALL_COPILOT=1
         prompt_project_dir
         return 0
         ;;
@@ -411,4 +418,7 @@ if [ "$INSTALL_CLAUDE" -eq 1 ]; then
 fi
 if [ "$INSTALL_CURSOR" -eq 1 ] || [ "$INSTALL_CODEWIZ" -eq 1 ]; then
   printf '%s\n' '接下来在聊天框里输入：帮我一步步安装 Predy'
+fi
+if [ "$INSTALL_COPILOT" -eq 1 ]; then
+  printf '%s\n' '接下来在 Copilot 聊天框里输入：帮我一步步安装 Predy'
 fi
