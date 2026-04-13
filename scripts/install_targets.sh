@@ -80,7 +80,7 @@ if [ "$INSTALL_CODEX" -eq 0 ] && [ "$INSTALL_CLAUDE" -eq 0 ] && [ "$INSTALL_CURS
 fi
 
 if { [ "$INSTALL_CURSOR" -eq 1 ] || [ "$INSTALL_CODEWIZ" -eq 1 ] || [ "$INSTALL_COPILOT" -eq 1 ]; } && [ -z "$PROJECT_DIR" ]; then
-  printf '%s\n' '--project is required for --cursor, --codewiz, or --copilot' >&2
+  printf '%s\n' '--project is required for project-based installs' >&2
   exit 1
 fi
 

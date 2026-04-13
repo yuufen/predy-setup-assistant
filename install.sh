@@ -42,8 +42,7 @@ Options:
   --claude                Install for Claude
   --cursor                Install for Cursor
   --codewiz               Install for CodeWiz
-  --copilot               Install for Copilot
-  --project <path>        Target project path for Cursor, CodeWiz, or Copilot
+  --project <path>        Target project path for project-based installs
   --codex-home <path>     Override CODEX_HOME
   --claude-home <path>    Override Claude home
   --help                  Show this help

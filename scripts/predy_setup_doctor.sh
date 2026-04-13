@@ -43,12 +43,12 @@ dir_state() {
 usage() {
   cat <<'EOF'
 Usage:
-  ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz|copilot] [--project /path/to/repo]
+  ./scripts/predy_setup_doctor.sh [--client codex|claude|cursor|codewiz] [--project /path/to/repo]
 
 Notes:
   - Pass --client to check the target client's skill and MCP state.
   - Without --client, the script only reports generic environment and certificate state.
-  - --project is required for cursor, codewiz, and copilot if you want target-specific skill state.
+  - --project is required for project-based clients if you want target-specific skill state.
 EOF
 }
 

@@ -1,6 +1,6 @@
 ---
 name: predy-setup-assistant
-description: "Help people install Predy and repair local setup on a fresh or half-configured machine. Use when the request is specifically about Predy or Predy MCP setup, for example: 帮我装 Predy, 帮我配 Predy MCP, Predy 装不上因为没有 Node, Predy 证书有问题, 我不是工程师你一步步带我把 Predy 装好. This repo can install setup guidance into Codex, Claude, Cursor, CodeWiz, and Copilot. It can auto-configure MCP for Codex, Cursor, and CodeWiz, and render a manual MCP-setup prompt fallback for supported clients when needed."
+description: "Help people install Predy and repair local setup on a fresh or half-configured machine. Use when the request is specifically about Predy or Predy MCP setup, for example: 帮我装 Predy, 帮我配 Predy MCP, Predy 装不上因为没有 Node, Predy 证书有问题, 我不是工程师你一步步带我把 Predy 装好. This repo can install setup guidance into Codex, Claude, Cursor, and CodeWiz. It can auto-configure MCP for Codex, Cursor, and CodeWiz, and render a manual MCP-setup prompt fallback for supported clients when needed."
 ---
 
 # Predy Setup Assistant
@@ -49,7 +49,7 @@ It can:
 - download the skill repo from its default repository URL or an overridden `--repo-url`
 - reuse a local checkout when run inside the repo
 - ask which client to install for when run without explicit client flags in an interactive terminal
-- install the right client assets for Codex, Claude, Cursor, Copilot, or CodeWiz
+- install the right client assets for Codex, Claude, Cursor, and CodeWiz
 
 Prefer this over telling non-engineers to `git clone` the repository.
 
@@ -68,13 +68,13 @@ Use this for the first pass. It reports:
 
 Treat `mkcert` as a diagnostic signal, not as a standalone installation step that must happen before `predy-skill install`.
 Do not default to a Codex MCP check when the user is configuring another client.
-For `cursor`, `codewiz`, or `copilot`, pass `--client` and `--project` so `predy.skill.state` and `predy.mcp.config.state` reflect the actual target project.
+For `cursor` or `codewiz`, pass `--client` and `--project` so `predy.skill.state` and `predy.mcp.config.state` reflect the actual target project.
 
 ### `scripts/render_predy_mcp_wrapper.sh`
 
 Use this to create a client-specific idempotent wrapper script that:
 
-- supports `--client codex|claude|cursor|codewiz|copilot`
+- supports `--client codex|claude|cursor|codewiz`
 - clears the current Predy MCP listener before startup
 - runs the globally installed `predy-skill mcp`
 - relies on `predy-skill install` to prepare local certificates automatically when needed
@@ -116,11 +116,12 @@ If `python3` is missing, edit the TOML directly instead of blocking on this scri
 11. Do not ask the user to install `mkcert` or localhost certificates manually before running `predy-skill install`; that command already prepares the local certificate setup.
 12. For client MCP managers, do not point the startup command directly at `npm exec --package=@predy-js/skill@beta -- predy-skill mcp`; use the generated wrapper instead.
 13. For a fresh MCP runtime, first install `@predy-js/skill@beta` globally, then run the matching `predy-skill install --<client>` command before wiring the client config.
-14. Do not tell non-Codex users that writing `~/.codex/config.toml` configures their client. It does not.
-15. For Cursor MCP wiring, write `~/.cursor/mcp.json` with `scripts/upsert_cursor_predy_mcp.py`.
-16. For CodeWiz MCP wiring, write `global_mcp_settings.json` with `scripts/upsert_codewiz_predy_mcp.py` instead of pointing at Codex config.
-17. For Codex, Cursor, or CodeWiz MCP wiring, keep a manual prompt fallback available through `scripts/render_manual_mcp_prompt.py`.
-18. For Claude or Copilot MCP wiring, generate the wrapper first and then render a manual prompt with `scripts/render_manual_mcp_prompt.py`.
+14. If the current host already reveals the client, do not ask the user to identify it again. Treat `.codewiz/skills/...` as CodeWiz, `.cursor/...` as Cursor, `~/.claude/...` as Claude, and `~/.codex/...` as Codex.
+15. Do not tell non-Codex users that writing `~/.codex/config.toml` configures their client. It does not.
+16. For Cursor MCP wiring, write `~/.cursor/mcp.json` with `scripts/upsert_cursor_predy_mcp.py`.
+17. For CodeWiz MCP wiring, write `global_mcp_settings.json` with `scripts/upsert_codewiz_predy_mcp.py` instead of pointing at Codex config.
+18. For Codex, Cursor, or CodeWiz MCP wiring, keep a manual prompt fallback available through `scripts/render_manual_mcp_prompt.py`.
+19. For Claude MCP wiring, generate the wrapper first and then render a manual prompt with `scripts/render_manual_mcp_prompt.py`.
 
 ## Communication Rules
 
@@ -129,7 +130,7 @@ If `python3` is missing, edit the TOML directly instead of blocking on this scri
    - 先装 Node，这样安装命令才能跑
    - 再运行 Predy 安装命令，它会把本地证书一起准备好
    - 如果你现在用的是 Codex、Cursor 或 CodeWiz，我先尝试自动把它的 MCP 配好；如果自动写失败，我再给你一条 prompt 兜底
-   - 如果你现在用的是 Claude 或 Copilot，我给你一条 prompt，让当前客户端自己把 MCP 配好
+   - 如果你现在用的是 Claude，我给你一条 prompt，让当前客户端自己把 MCP 配好
 3. If the environment is blocked, say exactly what is missing instead of dumping a long checklist.
 
 ## References
