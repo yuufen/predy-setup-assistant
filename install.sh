@@ -97,7 +97,7 @@ prompt_project_dir() {
   default_dir="$PWD"
 
   while :; do
-    answer="$(read_line "项目目录（默认值：$default_dir）：")"
+    answer="$(read_line "项目目录（默认值：${default_dir}）：")"
     if [ -z "$answer" ]; then
       answer="$default_dir"
     fi
