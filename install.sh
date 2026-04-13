@@ -97,7 +97,7 @@ prompt_project_dir() {
   default_dir="$PWD"
 
   while :; do
-    answer="$(read_line "项目目录 [$default_dir]：")"
+    answer="$(read_line "项目目录（默认值：$default_dir）：")"
     if [ -z "$answer" ]; then
       answer="$default_dir"
     fi
@@ -114,13 +114,13 @@ prompt_project_dir() {
 
 select_target_interactively() {
   printf '%s\n' '请选择要安装到哪个客户端：' >&2
-  printf '%s\n' '  1) Codex' >&2
+  printf '%s\n' '  1) Codex（默认）' >&2
   printf '%s\n' '  2) Claude' >&2
   printf '%s\n' '  3) Cursor' >&2
   printf '%s\n' '  4) CodeWiz' >&2
 
   while :; do
-    choice="$(read_line '请输入编号 [1]：')"
+    choice="$(read_line '请输入编号（默认值：1）：')"
     case "$choice" in
       ""|1)
         INSTALL_CODEX=1
