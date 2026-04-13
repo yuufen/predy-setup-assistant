@@ -75,8 +75,8 @@ For `cursor` or `codewiz`, pass `--client` and `--project` so `predy.skill.state
 Use this to create a client-specific idempotent wrapper script that:
 
 - supports `--client codex|claude|cursor|codewiz`
-- clears the current Predy MCP listener before startup
-- runs the globally installed `predy-skill mcp`
+- runs the globally installed `predy-skill mcp` via one stable local command path
+- keeps stdout clean for MCP protocol traffic and leaves human-readable guidance on stderr
 - relies on `predy-skill install` to prepare local certificates automatically when needed
 
 ### `scripts/upsert_codex_predy_mcp.py`

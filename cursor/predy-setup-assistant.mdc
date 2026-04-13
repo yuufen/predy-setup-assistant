@@ -76,7 +76,7 @@ python3 ./.cursor/predy-setup-assistant/scripts/render_manual_mcp_prompt.py \
   --command "$HOME/.predy-skill/bin/predy-mcp-cursor-beta.sh"
 ```
 
-Do not tell Cursor to use `npm exec --package=@predy-js/skill@beta -- predy-skill mcp` as the MCP startup command. The wrapper should be the long-running startup command, and stale-port recovery should happen automatically the next time Cursor re-runs that same wrapper.
+Do not tell Cursor to use `npm exec --package=@predy-js/skill@beta -- predy-skill mcp` as the MCP startup command. The wrapper should be the long-running startup command. If startup later fails because port `17654` is still occupied by an old `predy-mcp` process, tell Cursor to run `predy-skill kill-mcp --force` first, then re-run the same wrapper.
 
 Constraints:
 - This rule does not bypass approvals or sandbox restrictions.

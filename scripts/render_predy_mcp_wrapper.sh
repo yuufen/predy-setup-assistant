@@ -167,34 +167,7 @@ require_predy_skill_bin() {
   printf '%s\n' "\$predy_skill_bin"
 }
 
-find_listener_pids() {
-  if ! command -v lsof >/dev/null 2>&1; then
-    return 0
-  fi
-
-  lsof -nP -t -iTCP:"\$PORT" -sTCP:LISTEN 2>/dev/null || true
-}
-
-stop_existing_listener() {
-  predy_skill_bin="\$(resolve_predy_skill_bin || true)"
-  if [ -n "\$predy_skill_bin" ]; then
-    "\$predy_skill_bin" kill-mcp --port "\$PORT" >/dev/null 2>&1 || \\
-      "\$predy_skill_bin" kill-mcp --port "\$PORT" --force >/dev/null 2>&1 || true
-  fi
-
-  stale_pids="\$(find_listener_pids)"
-  [ -n "\$stale_pids" ] || return 0
-
-  printf 'Predy MCP wrapper: force killing remaining listener on port %s: %s\n' "\$PORT" "\$stale_pids" >&2
-
-  for pid in \$stale_pids; do
-    [ "\$pid" = "\$\$" ] && continue
-    kill -9 "\$pid" 2>/dev/null || true
-  done
-}
-
 predy_skill_bin="\$(require_predy_skill_bin)"
-stop_existing_listener
 exec env PREDY_MCP_WS_PORT="\$PORT" "\$predy_skill_bin" mcp
 EOF
 

@@ -138,6 +138,7 @@ env NPM_CONFIG_REGISTRY=http://npm.devops.xiaohongshu.com:7001 \
 ```
 
 MCP 管理器真正启动时，只需要执行 wrapper 本身，不带额外参数。
+这个 wrapper 只负责解析全局 `predy-skill` 路径并 `exec predy-skill mcp`，不会在启动前主动清理端口。
 
 ### 初始化或更新 Predy MCP runtime
 
@@ -299,14 +300,20 @@ python3 ./scripts/render_manual_mcp_prompt.py \
 
 - 日常启动：由客户端 MCP 管理器直接调用 wrapper
 - 更新 beta：手动重新执行上一节那套 `npm i -g ...` + `predy-skill install ...`
-- 端口被旧进程占用：不用额外配一条“重启命令”；客户端下次再拉起同一条 wrapper 启动命令时，wrapper 会先清旧端口，再启动新的 `predy-skill mcp`
+- 端口被旧进程占用：单独执行恢复命令，再让客户端重新拉起同一条 wrapper 启动命令
 
-wrapper 在启动前会先尝试清理 `17654` 端口上的旧 Predy MCP 监听；如果 `predy-skill kill-mcp` 没清干净，再回退到本地 `lsof + kill -9`。这能处理“端口还被旧的 predy-mcp 占着，但 Codex / CodeWiz 已经和它断开”的情况。
+推荐的恢复命令是：
+
+```bash
+predy-skill kill-mcp --force
+```
+
+`predy-skill mcp` 现在已经补了 `stdin end/close` 和 `stdout EPIPE` 的优雅退出路径，所以正常情况下客户端断开后，旧进程会更容易自己释放 `17654`。如果还是碰到残留进程，再手动执行上面的恢复命令。
 
 注意：
 
-- 客户端重新拉起 wrapper 时，会杀掉旧的 Predy MCP 进程，再拉起新的
-- 浏览器侧如果连着 `ws://127.0.0.1:17654` 或 `wss://localhost:17654`，这时会断一下，然后依赖页面自己的自动重连
+- 浏览器侧如果连着 `ws://127.0.0.1:17654` 或 `wss://localhost:17654`，手动执行 `kill-mcp` 时这条连接会断开，然后依赖页面自己的自动重连
+- 客户端自己重复拉起 wrapper 不会主动清旧端口；如果此时 `17654` 还被旧进程占着，启动会失败
 - 默认端口是 `17654`，也可以通过 `PREDY_MCP_PORT` 覆盖
 
 ### 验证

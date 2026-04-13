@@ -243,8 +243,8 @@ scripts/render_predy_mcp_wrapper.sh \
 
 That script writes a shell wrapper which:
 
-1. clears stale listeners on the Predy MCP port before every startup
-2. starts the globally installed `predy-skill mcp`
+1. starts the globally installed `predy-skill mcp`
+2. uses `exec` so the client talks directly to the MCP process
 3. keeps the client MCP manager on one stable local command path
 
 After the wrapper exists, initialize the runtime once with a global install plus the target-specific `predy-skill install`:
@@ -281,7 +281,7 @@ From that point on:
 
 1. the client MCP manager should execute the wrapper itself with no extra args
 2. updates should happen out-of-band by repeating the same global install plus `predy-skill install` commands
-3. stale-port recovery should happen automatically the next time the client re-runs the same wrapper startup command
+3. stale-port recovery should happen out-of-band with `predy-skill kill-mcp --force`, then the client should re-run the same wrapper startup command
 
 ### Codex auto-config
 
@@ -374,6 +374,14 @@ If the user wants a live runtime check, start the wrapper script and verify:
 ```bash
 lsof -nP -iTCP:17654 -sTCP:LISTEN
 ```
+
+If startup fails because the WebSocket port is still occupied by an old `predy-mcp` process, use this explicit recovery step:
+
+```bash
+predy-skill kill-mcp --force
+```
+
+Then let the client MCP manager start the same wrapper again.
 
 If the browser still rejects `wss://localhost:17654`, explain the likely local trust issue:
 
