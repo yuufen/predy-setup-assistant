@@ -27,6 +27,7 @@ usage() {
 Install Predy Setup Assistant without cloning the repository first.
 
 Usage:
+  ./install.sh
   ./install.sh --codex
   ./install.sh --repo-url <repo-web-url> --codex
   ./install.sh --archive-url <repo-archive-url> --cursor --project /path/to/repo
@@ -48,7 +49,8 @@ Options:
   --help                  Show this help
 
 Notes:
-  - If no target is passed, this script defaults to --codex.
+  - If no target is passed in an interactive terminal, this script asks which client to install for.
+  - If no target is passed in a non-interactive shell, this script defaults to --codex.
   - If you are not running from a checked-out repo, this script downloads from the default repo URL above.
 EOF
 }
@@ -62,6 +64,88 @@ cleanup() {
 fail() {
   printf '%s\n' "$1" >&2
   exit 1
+}
+
+read_line() {
+  prompt="$1"
+  printf '%s' "$prompt" >&2
+  IFS= read -r line || line=""
+  printf '%s' "$line"
+}
+
+normalize_dir() {
+  raw_path="$1"
+  case "$raw_path" in
+    "~")
+      raw_path="$HOME"
+      ;;
+    "~/"*)
+      raw_path="$HOME/${raw_path#~/}"
+      ;;
+  esac
+
+  if [ ! -d "$raw_path" ]; then
+    return 1
+  fi
+
+  (
+    cd "$raw_path"
+    pwd
+  )
+}
+
+prompt_project_dir() {
+  default_dir="$PWD"
+
+  while :; do
+    answer="$(read_line "Project path [$default_dir]: ")"
+    if [ -z "$answer" ]; then
+      answer="$default_dir"
+    fi
+
+    normalized_dir="$(normalize_dir "$answer" 2>/dev/null || true)"
+    if [ -n "$normalized_dir" ]; then
+      PROJECT_DIR="$normalized_dir"
+      return 0
+    fi
+
+    printf '%s\n' "Directory does not exist: $answer" >&2
+  done
+}
+
+select_target_interactively() {
+  printf '%s\n' 'Select the target assistant:' >&2
+  printf '%s\n' '  1) Codex' >&2
+  printf '%s\n' '  2) Claude' >&2
+  printf '%s\n' '  3) Cursor' >&2
+  printf '%s\n' '  4) CodeWiz' >&2
+
+  while :; do
+    choice="$(read_line 'Enter number [1]: ')"
+    case "$choice" in
+      ""|1)
+        INSTALL_CODEX=1
+        return 0
+        ;;
+      2)
+        INSTALL_CLAUDE=1
+        return 0
+        ;;
+      3)
+        INSTALL_CURSOR=1
+        prompt_project_dir
+        return 0
+        ;;
+      4)
+        INSTALL_CODEWIZ=1
+        prompt_project_dir
+        return 0
+        ;;
+      *)
+        printf '%s\n' "Invalid choice: $choice" >&2
+        ;;
+    esac
+  done
 }
 
 need_cmd() {
@@ -256,7 +340,11 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ "$INSTALL_CODEX" -eq 0 ] && [ "$INSTALL_CLAUDE" -eq 0 ] && [ "$INSTALL_CURSOR" -eq 0 ] && [ "$INSTALL_CODEWIZ" -eq 0 ] && [ "$INSTALL_COPILOT" -eq 0 ]; then
-  INSTALL_CODEX=1
+  if [ -t 0 ] && [ -t 1 ]; then
+    select_target_interactively
+  else
+    INSTALL_CODEX=1
+  fi
 fi
 
 if [ "$REPO_SET" -eq 1 ] && [ "$REPO_URL_SET" -eq 0 ]; then
@@ -318,4 +406,10 @@ printf '%s\n' "Restart the target assistant to pick up the new skill."
 
 if [ "$INSTALL_CODEX" -eq 1 ]; then
   printf '%s\n' 'In Codex, run: $predy-setup-assistant 帮我一步步安装 Predy'
+fi
+if [ "$INSTALL_CLAUDE" -eq 1 ]; then
+  printf '%s\n' 'In Claude, run: 请使用 predy-setup-assistant 帮我一步步安装 Predy'
+fi
+if [ "$INSTALL_CURSOR" -eq 1 ] || [ "$INSTALL_CODEWIZ" -eq 1 ]; then
+  printf '%s\n' 'In the chat box, run: 帮我一步步安装 Predy'
 fi

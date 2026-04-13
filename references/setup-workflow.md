@@ -81,6 +81,7 @@ Important boundary:
 - For Claude and Copilot, render a manual MCP-setup prompt after the wrapper is ready.
 
 For user distribution, prefer `install.sh` so the user does not need to `git clone` the repo first.
+If the user runs `install.sh` without client flags in a normal terminal, it will ask which client to install for and, for Cursor or CodeWiz, prompt for a project path when needed.
 
 Use `scripts/install_targets.sh` only when you already have a local copy of the repo and want a direct local install.
 
@@ -94,12 +95,10 @@ git@github.com:yuufen/predy-setup-assistant.git
 Bootstrap examples after the repo is available:
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codex
-
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --claude
-
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --cursor --project /path/to/repo
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh
 ```
+
+That single command is the preferred user-facing entrypoint. Keep the explicit `--codex` / `--claude` / `--cursor --project ...` flags only for support or automation cases.
 
 Local repo examples:
 

@@ -3,92 +3,46 @@
 ## 安装说明
 
 你不需要先安装 `predy-skill`，也不需要先 `git clone` 仓库。
-只要复制下面对应的一段命令到终端里执行，然后按提示操作就可以。
+只要复制下面的一段命令到终端里执行，然后按提示操作就可以。
 
 ## 开始前
 
-1. 先确认你正在用哪一个 AI 客户端：
-   `Codex`、`Claude`、`Cursor`、`CodeWiz`
-2. 打开你电脑上的“终端”应用。
-3. 下面每一段命令都建议整段复制，然后一次性回车。
-4. 在 macOS 上，第一条安装命令会先检查 `Homebrew`。如果机器还没有，它会先尝试拉起官方 Homebrew 安装程序，这一步通常会要求管理员密码；如果没装成功，setup assistant 仍然会先装好，后面真正安装 Predy 时再继续提示你处理。
-
-## 如果你用的是 Codex
-
-1. 把下面这条命令复制到终端里执行：
+1. 打开你电脑上的“终端”应用。
+2. 把下面这条命令整段复制进去，然后一次性回车：
 
 ```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codex
+curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh
 ```
 
-2. 安装完成后，彻底退出 Codex，再重新打开。
-3. 在 Codex 里输入这句话：
+3. 脚本会自己问你当前用的是哪个客户端：
+   `Codex`、`Claude`、`Cursor`、`CodeWiz`
+4. 如果你选的是 `Cursor` 或 `CodeWiz`，脚本还会继续问你的项目目录；你可以直接输入项目路径，或者在项目目录里执行这条命令后直接回车。
+5. 在 macOS 上，脚本开头会先检查 `Homebrew`。如果机器还没有，它会先尝试拉起官方 Homebrew 安装程序；如果没装成功，setup assistant 仍然会先装好，后面真正安装 Predy 时再继续提示你处理。
+
+## 安装完成后怎么说
+
+安装完成后，彻底退出当前 AI 客户端，再重新打开，然后在聊天框里输入：
+
+`Codex`
 
 ```text
 $predy-setup-assistant 帮我一步步安装 Predy
 ```
 
-4. 后面如果 Codex 提示你要安装 Node 或写配置，按提示确认即可。本地证书会在 Predy 安装时自动准备。
-5. 如果你后面还要把 Predy MCP 接进 Codex，setup assistant 会先尝试自动写入配置；如果自动写失败，也可以给你一条 prompt 兜底。
-
-## 如果你用的是 Claude
-
-1. 把下面这条命令复制到终端里执行：
-
-```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --claude
-```
-
-2. 安装完成后，彻底退出 Claude，再重新打开。
-3. 在 Claude 里输入这句话：
+`Claude`
 
 ```text
 请使用 predy-setup-assistant 帮我一步步安装 Predy
 ```
 
-4. 后面如果 Claude 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-5. 如果你后面还要把 Predy MCP 接进 Claude，setup assistant 会给你一条可直接复制的 prompt，让 Claude 自己去配置。
-
-## 如果你用的是 Cursor
-
-1. 先在终端里进入你当前项目的目录。
-   如果你不知道项目目录是什么，先找工程同学确认。
-2. 进入项目目录后，执行下面这条命令：
-
-```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --cursor --project "$PWD"
-```
-
-3. 回到 Cursor，重新打开这个项目。
-4. 在聊天框里输入这句话：
+`Cursor` / `CodeWiz`
 
 ```text
 帮我一步步安装 Predy
 ```
 
-5. 后面如果 Cursor 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 安装完成后，项目里会多出一个 `./.cursor/predy-setup-assistant/` 目录，里面放的是 setup assistant 给 Cursor 用的 helper 脚本。
-7. 如果你后面还要把 Predy MCP 接进 Cursor，setup assistant 会先尝试自动写入 `~/.cursor/mcp.json`；如果自动写失败，也会给你一条可直接复制的 prompt 兜底。
-
-## 如果你用的是 CodeWiz
-
-1. 先在终端里进入你当前项目的目录。
-   如果你不知道项目目录是什么，先找工程同学确认。
-2. 进入项目目录后，执行下面这条命令：
-
-```bash
-curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/predy-setup-assistant/main/install.sh && bash /tmp/predy-setup-install.sh --codewiz --project "$PWD"
-```
-
-3. 回到 CodeWiz，重新打开这个项目。
-4. 在聊天框里输入这句话：
-
-```text
-帮我一步步安装 Predy
-```
-
-5. 后面如果 CodeWiz 提示你要安装 Node 或 Predy 相关依赖，按提示确认即可。本地证书会在 `predy-skill install` 时自动准备。
-6. 如果你后面还要把 Predy MCP 接进 CodeWiz，setup assistant 可以继续自动写入 CodeWiz 的 MCP 配置；如果自动写失败，也会给一条 prompt 兜底。
+后面如果 AI 提示你要安装 Node、写配置、或者准备本地证书，按提示确认即可。
+其中 `Cursor` 安装完成后，项目里会多出一个 `./.cursor/predy-setup-assistant/` helper 目录；`CodeWiz` 则会在项目里多出 `./.codewiz/skills/predy-setup-assistant/`。
 
 ## 安装过程中常见情况
 
@@ -107,7 +61,7 @@ curl -L -o /tmp/predy-setup-install.sh https://raw.githubusercontent.com/yuufen/
 
 ## 一句话总结
 
-先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex`、`Cursor`、`CodeWiz` 还可以继续自动配置 MCP；`Claude`、`Copilot` 会收到一条配置 prompt。前面三者如果自动写失败，也有 prompt 兜底。
+先执行一条安装命令，把 `predy-setup-assistant` 放进你的 AI 客户端里；然后直接对 AI 说“帮我一步步安装 Predy”，后面的 Node、Predy 和本地证书都会按步骤带你完成。`Codex`、`Cursor`、`CodeWiz` 还可以继续自动配置 MCP；`Claude` 会收到一条配置 prompt。前面三者如果自动写失败，也有 prompt 兜底。
 
 ## 给工程 / 支持同学的补充说明
 

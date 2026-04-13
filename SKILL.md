@@ -48,6 +48,7 @@ It can:
 
 - download the skill repo from its default repository URL or an overridden `--repo-url`
 - reuse a local checkout when run inside the repo
+- ask which client to install for when run without explicit client flags in an interactive terminal
 - install the right client assets for Codex, Claude, Cursor, Copilot, or CodeWiz
 
 Prefer this over telling non-engineers to `git clone` the repository.
