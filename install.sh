@@ -24,33 +24,33 @@ TMP_DIR=""
 
 usage() {
   cat <<'EOF'
-Install Predy Setup Assistant without cloning the repository first.
+安装 Predy Setup Assistant，不需要先 git clone 仓库。
 
-Usage:
+用法：
   ./install.sh
   ./install.sh --codex
   ./install.sh --repo-url <repo-web-url> --codex
   ./install.sh --archive-url <repo-archive-url> --cursor --project /path/to/repo
 
-Options:
-  --repo <namespace/name> Repository path, default: yuufen/predy-setup-assistant
-  --repo-url <url>        Repository web URL, default: https://github.com/yuufen/predy-setup-assistant
-  --archive-url <url>     Repository archive URL for this ref, overrides auto-detection
-  --ref <git-ref>         Git ref to download, default: main
-  --source-dir <path>     Local skill directory, mainly for testing or local use
-  --codex                 Install for Codex
-  --claude                Install for Claude
-  --cursor                Install for Cursor
-  --codewiz               Install for CodeWiz
-  --project <path>        Target project path for project-based installs
-  --codex-home <path>     Override CODEX_HOME
-  --claude-home <path>    Override Claude home
-  --help                  Show this help
+参数：
+  --repo <namespace/name> 仓库路径，默认：yuufen/predy-setup-assistant
+  --repo-url <url>        仓库网页地址，默认：https://github.com/yuufen/predy-setup-assistant
+  --archive-url <url>     指定当前 ref 的归档下载地址，优先于自动推断
+  --ref <git-ref>         下载的 git ref，默认：main
+  --source-dir <path>     本地 skill 目录，主要用于测试或本地使用
+  --codex                 为 Codex 安装
+  --claude                为 Claude 安装
+  --cursor                为 Cursor 安装
+  --codewiz               为 CodeWiz 安装
+  --project <path>        项目型安装的目标项目路径
+  --codex-home <path>     覆盖 CODEX_HOME
+  --claude-home <path>    覆盖 Claude home
+  --help                  显示帮助
 
-Notes:
-  - If no target is passed in an interactive terminal, this script asks which client to install for.
-  - If no target is passed in a non-interactive shell, this script defaults to --codex.
-  - If you are not running from a checked-out repo, this script downloads from the default repo URL above.
+说明：
+  - 如果在交互式终端里没有传客户端参数，脚本会询问你要安装到哪个客户端。
+  - 如果在非交互式环境里没有传客户端参数，脚本默认按 --codex 处理。
+  - 如果当前不是在本地仓库目录里执行，脚本会从上面的默认仓库地址自动下载。
 EOF
 }
 
@@ -97,7 +97,7 @@ prompt_project_dir() {
   default_dir="$PWD"
 
   while :; do
-    answer="$(read_line "Project path [$default_dir]: ")"
+    answer="$(read_line "项目目录 [$default_dir]：")"
     if [ -z "$answer" ]; then
       answer="$default_dir"
     fi
@@ -108,19 +108,19 @@ prompt_project_dir() {
       return 0
     fi
 
-    printf '%s\n' "Directory does not exist: $answer" >&2
+    printf '%s\n' "目录不存在：$answer" >&2
   done
 }
 
 select_target_interactively() {
-  printf '%s\n' 'Select the target assistant:' >&2
+  printf '%s\n' '请选择要安装到哪个客户端：' >&2
   printf '%s\n' '  1) Codex' >&2
   printf '%s\n' '  2) Claude' >&2
   printf '%s\n' '  3) Cursor' >&2
   printf '%s\n' '  4) CodeWiz' >&2
 
   while :; do
-    choice="$(read_line 'Enter number [1]: ')"
+    choice="$(read_line '请输入编号 [1]：')"
     case "$choice" in
       ""|1)
         INSTALL_CODEX=1
@@ -141,7 +141,7 @@ select_target_interactively() {
         return 0
         ;;
       *)
-        printf '%s\n' "Invalid choice: $choice" >&2
+        printf '%s\n' "无效选项：$choice" >&2
         ;;
     esac
   done
@@ -149,7 +149,7 @@ select_target_interactively() {
 
 need_cmd() {
   if ! command -v "$1" >/dev/null 2>&1; then
-    fail "Missing required command: $1"
+    fail "缺少必要命令：$1"
   fi
 }
 
@@ -181,16 +181,16 @@ maybe_install_homebrew() {
 
   need_cmd curl
 
-  printf '%s\n' 'Homebrew is missing on macOS. Trying the official Homebrew installer first. macOS may ask for an administrator password.'
+  printf '%s\n' '当前 macOS 机器还没有 Homebrew。先尝试运行官方 Homebrew 安装器，系统可能会要求输入管理员密码。'
 
   if /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
     if activate_homebrew; then
-      printf '%s\n' 'Homebrew is now available.'
+      printf '%s\n' 'Homebrew 已可用。'
     else
-      printf '%s\n' 'Homebrew may have installed successfully, but this shell cannot see it yet. Open a new terminal if later install steps still say brew is missing.' >&2
+      printf '%s\n' 'Homebrew 可能已经安装成功，但当前这个终端还没有识别到它。如果后面仍提示 brew 缺失，请重新打开一个终端再试。' >&2
     fi
   else
-    printf '%s\n' 'Homebrew installation did not complete. Continuing to install the setup assistant; later Predy install steps may still stop here until Homebrew is installed.' >&2
+    printf '%s\n' 'Homebrew 安装没有完成。先继续安装 setup assistant；后面真正安装 Predy 时，仍可能在这里停下来。' >&2
   fi
 }
 
@@ -238,7 +238,7 @@ download_source_dir() {
   if [ -n "$ARCHIVE_URL" ]; then
     curl -L --fail "$ARCHIVE_URL" -o "$ZIP_PATH"
     if ! is_valid_zip "$ZIP_PATH"; then
-      fail "Archive URL did not return a valid zip file: $ARCHIVE_URL"
+      fail "归档地址返回的不是有效 zip 文件：$ARCHIVE_URL"
     fi
   else
     REPO_URL_CLEAN="${REPO_URL%/}"
@@ -254,7 +254,7 @@ download_source_dir() {
 
     curl -L --fail "$DOWNLOAD_URL" -o "$ZIP_PATH"
     if ! is_valid_zip "$ZIP_PATH"; then
-      fail "Repo archive URL did not return a valid zip file: $DOWNLOAD_URL"
+      fail "仓库归档地址返回的不是有效 zip 文件：$DOWNLOAD_URL"
     fi
   fi
 
@@ -269,7 +269,7 @@ download_source_dir() {
     fi
   done
 
-  fail "Downloaded repository does not look like a $SKILL_NAME repo."
+  fail "下载下来的仓库看起来不是一个 $SKILL_NAME 仓库。"
 }
 
 while [ "$#" -gt 0 ]; do
@@ -333,7 +333,7 @@ while [ "$#" -gt 0 ]; do
       exit 0
       ;;
     *)
-      fail "Unknown argument: $1"
+      fail "未知参数：$1"
       ;;
   esac
 done
@@ -361,7 +361,7 @@ else
 fi
 
 if [ ! -f "$SOURCE_DIR/SKILL.md" ] || [ ! -f "$SOURCE_DIR/scripts/install_targets.sh" ]; then
-  fail "Invalid --source-dir: $SOURCE_DIR"
+  fail "无效的 --source-dir：$SOURCE_DIR"
 fi
 
 set --
@@ -391,7 +391,7 @@ if [ -n "$CLAUDE_HOME" ]; then
   set -- "$@" --claude-home "$CLAUDE_HOME"
 fi
 
-printf '%s\n' "Installing $SKILL_NAME from $SOURCE_DIR"
+printf '%s\n' "正在从 $SOURCE_DIR 安装 $SKILL_NAME"
 
 # Reuse the repo-local installer so each client stays on the same copy logic.
 (
@@ -400,15 +400,15 @@ printf '%s\n' "Installing $SKILL_NAME from $SOURCE_DIR"
 )
 
 printf '\n'
-printf '%s\n' "Installed $SKILL_NAME."
-printf '%s\n' "Restart the target assistant to pick up the new skill."
+printf '%s\n' "$SKILL_NAME 安装完成。"
+printf '%s\n' '请重启目标客户端，让它重新加载这个 skill。'
 
 if [ "$INSTALL_CODEX" -eq 1 ]; then
-  printf '%s\n' 'In Codex, run: $predy-setup-assistant 帮我一步步安装 Predy'
+  printf '%s\n' '接下来在 Codex 里输入：$predy-setup-assistant 帮我一步步安装 Predy'
 fi
 if [ "$INSTALL_CLAUDE" -eq 1 ]; then
-  printf '%s\n' 'In Claude, run: 请使用 predy-setup-assistant 帮我一步步安装 Predy'
+  printf '%s\n' '接下来在 Claude 里输入：请使用 predy-setup-assistant 帮我一步步安装 Predy'
 fi
 if [ "$INSTALL_CURSOR" -eq 1 ] || [ "$INSTALL_CODEWIZ" -eq 1 ]; then
-  printf '%s\n' 'In the chat box, run: 帮我一步步安装 Predy'
+  printf '%s\n' '接下来在聊天框里输入：帮我一步步安装 Predy'
 fi

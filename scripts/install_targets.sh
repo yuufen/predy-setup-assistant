@@ -65,7 +65,7 @@ while [ "$#" -gt 0 ]; do
       shift 2
       ;;
     *)
-      printf 'Unknown argument: %s\n' "$1" >&2
+      printf '未知参数：%s\n' "$1" >&2
       exit 1
       ;;
   esac
@@ -80,35 +80,35 @@ if [ "$INSTALL_CODEX" -eq 0 ] && [ "$INSTALL_CLAUDE" -eq 0 ] && [ "$INSTALL_CURS
 fi
 
 if { [ "$INSTALL_CURSOR" -eq 1 ] || [ "$INSTALL_CODEWIZ" -eq 1 ] || [ "$INSTALL_COPILOT" -eq 1 ]; } && [ -z "$PROJECT_DIR" ]; then
-  printf '%s\n' '--project is required for project-based installs' >&2
+  printf '%s\n' '项目型安装必须传 --project' >&2
   exit 1
 fi
 
 if [ "$INSTALL_CODEX" -eq 1 ]; then
   copy_dir "$ROOT_DIR" "$CODEX_HOME/skills/$SKILL_NAME"
-  printf 'codex installed: %s\n' "$CODEX_HOME/skills/$SKILL_NAME"
+  printf 'Codex 安装完成：%s\n' "$CODEX_HOME/skills/$SKILL_NAME"
 fi
 
 if [ "$INSTALL_CLAUDE" -eq 1 ]; then
   copy_dir "$ROOT_DIR" "$CLAUDE_HOME/skills/$SKILL_NAME"
   copy_file "$ROOT_DIR/claude/$SKILL_NAME.md" "$CLAUDE_HOME/agents/$SKILL_NAME.md"
-  printf 'claude skill installed: %s\n' "$CLAUDE_HOME/skills/$SKILL_NAME"
-  printf 'claude agent installed: %s\n' "$CLAUDE_HOME/agents/$SKILL_NAME.md"
+  printf 'Claude skill 安装完成：%s\n' "$CLAUDE_HOME/skills/$SKILL_NAME"
+  printf 'Claude agent 安装完成：%s\n' "$CLAUDE_HOME/agents/$SKILL_NAME.md"
 fi
 
 if [ "$INSTALL_CURSOR" -eq 1 ]; then
   copy_dir "$ROOT_DIR" "$PROJECT_DIR/.cursor/$SKILL_NAME"
   copy_file "$ROOT_DIR/cursor/$SKILL_NAME.mdc" "$PROJECT_DIR/.cursor/rules/$SKILL_NAME.mdc"
-  printf 'cursor helper bundle installed: %s\n' "$PROJECT_DIR/.cursor/$SKILL_NAME"
-  printf 'cursor rule installed: %s\n' "$PROJECT_DIR/.cursor/rules/$SKILL_NAME.mdc"
+  printf 'Cursor helper bundle 安装完成：%s\n' "$PROJECT_DIR/.cursor/$SKILL_NAME"
+  printf 'Cursor rule 安装完成：%s\n' "$PROJECT_DIR/.cursor/rules/$SKILL_NAME.mdc"
 fi
 
 if [ "$INSTALL_CODEWIZ" -eq 1 ]; then
   copy_dir "$ROOT_DIR" "$PROJECT_DIR/.codewiz/skills/$SKILL_NAME"
-  printf 'codewiz skill installed: %s\n' "$PROJECT_DIR/.codewiz/skills/$SKILL_NAME"
+  printf 'CodeWiz skill 安装完成：%s\n' "$PROJECT_DIR/.codewiz/skills/$SKILL_NAME"
 fi
 
 if [ "$INSTALL_COPILOT" -eq 1 ]; then
   copy_dir "$ROOT_DIR" "$PROJECT_DIR/.github/skills/$SKILL_NAME"
-  printf 'copilot skill installed: %s\n' "$PROJECT_DIR/.github/skills/$SKILL_NAME"
+  printf 'Copilot skill 安装完成：%s\n' "$PROJECT_DIR/.github/skills/$SKILL_NAME"
 fi
